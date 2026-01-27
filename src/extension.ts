@@ -246,15 +246,34 @@ async function handleDevCreate(
             }
 
             // Create directories if they don't exist
-            const dirUri = vscode.Uri.file(path.dirname(targetUri.fsPath));
-            await vscode.workspace.fs.createDirectory(dirUri);
+            const targetDir = path.dirname(targetUri.fsPath);
+            await vscode.workspace.fs.createDirectory(vscode.Uri.file(targetDir));
+
+            let counter = 1;
+            const originalUri = targetUri;
+
+            // Check if file exists and increment numbering if needed
+            while (true) {
+                try {
+                    await vscode.workspace.fs.stat(targetUri);
+                    // File exists, generate new name
+                    const ext = path.extname(suggestedFilename);
+                    const baseName = path.basename(suggestedFilename, ext);
+                    const newName = `${baseName}-${counter}${ext}`;
+                    targetUri = vscode.Uri.file(path.join(targetDir, newName));
+                    counter++;
+                } catch (e) {
+                    // File does not exist, we found our target
+                    break;
+                }
+            }
 
             await vscode.workspace.fs.writeFile(targetUri, Buffer.from(code, 'utf8'));
 
             const newDoc = await vscode.workspace.openTextDocument(targetUri);
             await vscode.window.showTextDocument(newDoc, vscode.ViewColumn.Beside);
 
-            vscode.window.showInformationMessage(`Created: ${suggestedFilename}`);
+            vscode.window.showInformationMessage(`Created: ${path.basename(targetUri.fsPath)}`);
         } catch (error) {
             vscode.window.showErrorMessage(`Generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }

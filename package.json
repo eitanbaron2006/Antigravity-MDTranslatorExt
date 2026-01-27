@@ -2,7 +2,7 @@
     "name": "md-translator",
     "displayName": "Markdown Translator Preview",
     "description": "Shows a translated preview of Markdown files without modifying the original file, including a summary.",
-    "version": "0.2.7",
+    "version": "0.3.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/EitanBaron/Antigravity-MDTranslatorExt"
@@ -179,6 +179,19 @@
                     "default": "",
                     "description": "Custom path or folder name where Dev Create files should be saved (absolute or relative to workspace).",
                     "order": 15
+                },
+                "md-translator.devSystemPrompt": {
+                    "type": "string",
+                    "default": "",
+                    "edit:multiline": true,
+                    "description": "Global instructions sent to AI for every Dev Create or Dev Upgrade request.",
+                    "order": 16
+                },
+                "md-translator.useProjectSkills": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Automatically include project-specific skills (from .agent/skills) in AI prompts.",
+                    "order": 17
                 }
             }
         },
