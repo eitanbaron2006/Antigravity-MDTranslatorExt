@@ -1,0 +1,209 @@
+{
+    "name": "md-translator",
+    "displayName": "Markdown Translator Preview",
+    "description": "Shows a translated preview of Markdown files without modifying the original file, including a summary.",
+    "version": "0.1.8",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/EitanBaron/Antigravity-MDTranslatorExt"
+    },
+    "publisher": "EitanBaron",
+    "engines": {
+        "vscode": "^1.95.0"
+    },
+    "activationEvents": [
+        "onLanguage:markdown",
+        "onStartupFinished"
+    ],
+    "contributes": {
+        "commands": [
+            {
+                "command": "md-translator.showPreview",
+                "title": "Translate",
+                "icon": "$(symbol-method)"
+            },
+            {
+                "command": "md-translator.devAnalysis",
+                "title": "Dev Recommendations",
+                "icon": "$(lightbulb)"
+            },
+            {
+                "command": "md-translator.devCreate",
+                "title": "Dev Create",
+                "icon": "$(repo-create)"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Markdown Translator",
+            "properties": {
+                "md-translator.language": {
+                    "type": "string",
+                    "enum": [
+                        "en",
+                        "he"
+                    ],
+                    "default": "en",
+                    "enumDescriptions": [
+                        "English",
+                        "עברית (Hebrew - with RTL support)"
+                    ],
+                    "description": "Language for translation and UI elements",
+                    "order": 1
+                },
+                "md-translator.summaryLength": {
+                    "type": "string",
+                    "default": "medium",
+                    "description": "Length of the summary: short, medium, or long.",
+                    "order": 3
+                },
+                "md-translator.aiProvider": {
+                    "type": "string",
+                    "enum": [
+                        "Gemini",
+                        "OpenAI",
+                        "Anthropic",
+                        "DeepSeek",
+                        "Custom"
+                    ],
+                    "default": "Gemini",
+                    "description": "Select the AI provider for translation and analysis.",
+                    "order": 4
+                },
+                "md-translator.aiModel": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Model name (e.g., 'gpt-4o', 'claude-3-5-sonnet', 'grok-code-fast-1'). Leave empty to use provider default.",
+                    "order": 5
+                },
+                "md-translator.customUrl": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Base URL for Custom provider (e.g., 'https://api.openai.com/v1'). Required if provider is Custom.",
+                    "order": 6
+                },
+                "md-translator.apiKey": {
+                    "type": "string",
+                    "default": "",
+                    "description": "API key for the selected AI provider.",
+                    "order": 7
+                },
+                "md-translator.ignoreListActive": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable/Disable reading patterns from ignore files.",
+                    "order": 8
+                },
+                "md-translator.ignoreFiles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [
+                        ".gitignore",
+                        ".vscodeignore",
+                        ".linecounterignore"
+                    ],
+                    "description": "List of files to read ignore patterns from (e.g., .gitignore).",
+                    "order": 9
+                },
+                "md-translator.whitelistActive": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable/Disable whitelist mode. Only files matching patterns in the included files will be translatable.",
+                    "order": 10
+                },
+                "md-translator.includeFiles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [
+                        ".linecounterinclude"
+                    ],
+                    "description": "List of files to read Whitelist (Include) patterns from.",
+                    "order": 11
+                },
+                "md-translator.devAnalysisIncludeFiles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [
+                        "*.ts",
+                        "*.js",
+                        "*.py",
+                        "*.tsx",
+                        "*.jsx"
+                    ],
+                    "description": "Whitelist patterns for Development Recommendations.",
+                    "order": 12
+                },
+                "md-translator.devCreateIncludeFiles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [
+                        "*.prompt",
+                        "*.txt",
+                        "*.md"
+                    ],
+                    "description": "Whitelist patterns for AI Code Generation (Dev Create).",
+                    "order": 13
+                },
+                "md-translator.devLang": {
+                    "type": "string",
+                    "enum": [
+                        "python",
+                        "nextjs",
+                        "react vite",
+                        "html+js+css",
+                        "vanilla js",
+                        "tailwind",
+                        "typescript",
+                        "csharp",
+                        "go"
+                    ],
+                    "default": "vanilla js",
+                    "description": "Target language/framework for development analysis and creation.",
+                    "order": 14
+                }
+            }
+        },
+        "menus": {
+            "editor/title": [
+                {
+                    "command": "md-translator.showPreview",
+                    "group": "navigation",
+                    "when": "resourceLangId == markdown"
+                },
+                {
+                    "command": "md-translator.devAnalysis",
+                    "group": "navigation",
+                    "when": "resourceExtname =~ /\\.(ts|js|py|tsx|jsx|go|cs|cpp|c|java)/"
+                },
+                {
+                    "command": "md-translator.devCreate",
+                    "group": "navigation",
+                    "when": "resourceExtname =~ /\\.(prompt|txt|md)/"
+                }
+            ]
+        }
+    },
+    "main": "./out/extension.js",
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "package": "vsce package"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "@types/node-fetch": "^2.6.13",
+        "@types/vscode": "^1.95.0",
+        "@vscode/vsce": "^2.0.0",
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {}
+}
