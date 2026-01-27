@@ -60,7 +60,7 @@ export class FileFilter {
         this.loaded = false;
     }
 
-    isAllowed(filePath: string, zone: 'translate' | 'analysis' | 'create' = 'translate'): { allowed: boolean, reason?: string } {
+    isAllowed(filePath: string, zone: 'translate' | 'analysis' | 'create' | 'upgrade' = 'translate'): { allowed: boolean, reason?: string } {
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders) return { allowed: true };
         const workspaceRoot = workspaceFolders[0].uri.fsPath;
@@ -73,7 +73,7 @@ export class FileFilter {
             return { allowed: false, reason: 'File not matched by whitelist patterns' };
         }
 
-        if (zone === 'analysis' && !this.isIncluded(filePath, workspaceRoot, this.devAnalysisPatterns)) {
+        if ((zone === 'analysis' || zone === 'upgrade') && !this.isIncluded(filePath, workspaceRoot, this.devAnalysisPatterns)) {
             return { allowed: false, reason: 'File not matched by analysis whitelist' };
         }
 

@@ -26,10 +26,11 @@ export class AiService {
         const prompt = `You are a professional software architect. 
 Analyze the provided code and suggest specific, high-quality improvements.
 The target stack/language is: ${settings.devLang}.
+CRITICAL: All explanations, reviews, and reasons MUST be in ${settings.language}.
 Return a JSON object with a "recommendations" field which is an array of objects.
 Each object MUST have:
-- "title": Short description of the improvement.
-- "reason": Why this change is beneficial.
+- "title": Short description of the improvement (in ${settings.language}).
+- "reason": Why this change is beneficial (in ${settings.language}).
 - "before": The exact block of code to replace.
 - "after": The improved code block.
 
@@ -42,17 +43,36 @@ ${text}`;
         return result.recommendations || [];
     }
 
-    async generateCode(description: string): Promise<string> {
+    async generateCode(description: string): Promise<{ code: string; suggestedFilename: string }> {
         const settings = this.getSettings();
         const prompt = `You are an expert coder. 
 Build a solution for the following description using ${settings.devLang}.
-Return a JSON object with a "code" field containing the full implementation.
+Return a JSON object with:
+- "code": The full implementation code.
+- "suggestedFilename": A professional filename with the correct extension for this implementation.
 
 Description:
 ${description}`;
 
         const result = await this.callAiApi(prompt, settings);
-        return result.code || '// No code generated';
+        return {
+            code: result.code || '// No code generated',
+            suggestedFilename: result.suggestedFilename || 'generated_code.txt'
+        };
+    }
+
+    async upgradeCode(text: string, userPrompt: string): Promise<string> {
+        const settings = this.getSettings();
+        const prompt = `You are an expert developer. 
+Improve and upgrade the following code based on these instructions: ${userPrompt || 'Make it cleaner, more efficient, and professional'}.
+The target stack/language is: ${settings.devLang}.
+Return a JSON object with a "code" field containing the full upgraded implemention.
+
+Original Code:
+${text}`;
+
+        const result = await this.callAiApi(prompt, settings);
+        return result.code || text;
     }
 
     private async callAiApi(prompt: string, settings: any): Promise<any> {

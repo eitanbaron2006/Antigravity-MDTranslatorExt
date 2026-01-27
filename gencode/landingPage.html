@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דף נחיתה מרשים</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* General Styles */
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Top Menu Styles */
+        .top-menu {
+            background-color: rgba(59, 130, 246, 0.9);
+            /* Blue with transparency */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .top-menu .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .top-menu .logo a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .top-menu nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        .top-menu nav ul li {
+            margin-left: 20px;
+        }
+
+        .top-menu nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .top-menu nav ul li a:hover {
+            color: gold;
+        }
+
+        /* Hero Section Styles */
+        .hero {
+            background-image: url('https://picsum.photos/1920/1080?random=1');
+            background-size: cover;
+            background-position: center;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            position: relative;
+            /* For the overlay */
+            margin-top: 60px;
+            /* Prevent overlap with fixed menu */
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            /* Semi-transparent overlay */
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            /* Ensure text is above overlay */
+            padding: 20px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+        }
+
+        /* Feature Image Styles */
+        .feature-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Rest of your existing styles */
+    </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Top Menu -->
+    <div class="top-menu">
+        <div class="container">
+            <nav>
+                <ul>
+                    <li><a href="#vision">החזון שלנו</a></li>
+                    <li><a href="#services">השירותים שלנו</a></li>
+                    <li><a href="#features">תכונות</a></li>
+                    <li><a href="#team">הצוות שלנו</a></li>
+                    <li><a href="#testimonials">מה הלקוחות אומרים</a></li>
+                    <li><a href="#contact">צרו קשר</a></li>
+                </ul>
+            </nav>
+            <div class="logo">
+                <a href="#">הלוגו שלך</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="text-4xl font-extrabold mb-2">פתרונות הטכנולוגיה המתקדמים ביותר</h1>
+            <p class="text-xl">השותף שלך להצלחה דיגיטלית</p>
+            <button
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded mt-4 focus:outline-none focus:shadow-outline">
+                למידע נוסף
+            </button>
+        </div>
+    </section>
+
+    <!-- Vision Section -->
+    <section id="vision" class="py-16">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <h2 class="text-3xl font-semibold mb-6 text-right">החזון שלנו</h2>
+                <p class="mb-6 text-right leading-relaxed">
+                    אנו שואפים להיות חוד החנית של החדשנות הטכנולוגית, לספק פתרונות פורצי דרך שמניעים את העסקים של
+                    לקוחותינו קדימה.
+                    המחויבות שלנו היא לאיכות, שירות לקוחות מעולה ושמירה על סטנדרטים אתיים גבוהים.
+                </p>
+                <button
+                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline"
+                    type="button" aria-label="למידע נוסף">
+                    קרא עוד
+                </button>
+            </div>
+            <div>
+                <img src="https://picsum.photos/640/480?random=2" alt="צוות עבודה" class="feature-image">
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="bg-gray-200 py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-semibold mb-8 text-center">השירותים שלנו</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <img src="https://picsum.photos/640/480?random=3" alt="פיתוח תוכנה" class="feature-image mb-4">
+                    <h3 class="text-xl font-semibold mb-2 text-center">פיתוח תוכנה</h3>
+                    <p class="text-gray-700 text-center">פתרונות תוכנה מותאמים אישית לכל סוגי העסקים.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <img src="https://picsum.photos/640/480?random=4" alt="שיווק דיגיטלי" class="feature-image mb-4">
+                    <h3 class="text-xl font-semibold mb-2 text-center">שיווק דיגיטלי</h3>
+                    <p class="text-gray-700 text-center">הגדלת החשיפה וההמרות של העסק שלך באינטרנט.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <img src="https://picsum.photos/640/480?random=5" alt="ייעוץ טכנולוגי" class="feature-image mb-4">
+                    <h3 class="text-xl font-semibold mb-2 text-center">ייעוץ טכנולוגי</h3>
+                    <p class="text-gray-700 text-center">ייעוץ מומחה לבחירת הטכנולוגיות המתאימות ביותר.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-semibold mb-8 text-center">התכונות שלנו</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <i class="fas fa-rocket text-4xl text-blue-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">מהירות ויעילות</h3>
+                    <p class="text-gray-700">אנו מספקים פתרונות מהירים ויעילים כדי לעזור לך להשיג את המטרות שלך.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <i class="fas fa-shield-alt text-4xl text-green-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">אבטחה מתקדמת</h3>
+                    <p class="text-gray-700">אנו משתמשים בטכנולוגיות אבטחה מתקדמות כדי להגן על הנתונים שלך.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <i class="fas fa-chart-line text-4xl text-purple-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">ניתוח נתונים</h3>
+                    <p class="text-gray-700">אנו מספקים ניתוח נתונים מעמיק כדי לעזור לך לקבל החלטות מושכלות.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="bg-gray-200 py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-semibold mb-8 text-center">הצוות שלנו</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <img src="https://picsum.photos/200/200?random=9" alt="תמונה של חבר צוות"
+                        class="rounded-full mx-auto mb-4">
+                    <h3 class="text-xl font-semibold mb-2 text-center">אבי כהן</h3>
+                    <p class="text-gray-700 text-center">מנכ"ל</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <img src="https://picsum.photos/200/200?random=10" alt="תמונה של חבר צוות"
+                        class="rounded-full mx-auto mb-4">
+                    <h3 class="text-xl font-semibold mb-2 text-center">שרה לוי</h3>
+                    <p class="text-gray-700 text-center">סמנכ"לית שיווק</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <img src="https://picsum.photos/200/200?random=11" alt="תמונה של חבר צוות"
+                        class="rounded-full mx-auto mb-4">
+                    <h3 class="text-xl font-semibold mb-2 text-center">דוד יוסף</h3>
+                    <p class="text-gray-700 text-center">מנהל פיתוח</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <img src="https://picsum.photos/200/200?random=12" alt="תמונה של חבר צוות"
+                        class="rounded-full mx-auto mb-4">
+                    <h3 class="text-xl font-semibold mb-2 text-center">רחל מזרחי</h3>
+                    <p class="text-gray-700 text-center">מעצבת UX/UI</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-16 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-semibold mb-8 text-center">מה הלקוחות שלנו אומרים</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <p class="text-gray-700 mb-4">"השירות שלהם היה יוצא מן הכלל! הם עזרו לנו להגדיל את המכירות שלנו
+                        ב-50%."</p>
+                    <div class="flex items-center">
+                        <img src="https://picsum.photos/50/50?random=6" alt="תמונה של לקוח" class="rounded-full mr-4">
+                        <div>
+                            <p class="font-semibold">אבי כהן</p>
+                            <p class="text-sm text-gray-500">מנכ"ל, חברת XYZ</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <p class="text-gray-700 mb-4">"הצוות שלהם מקצועי ואדיב, הם תמיד זמינים לעזור בכל שאלה."</p>
+                    <div class="flex items-center">
+                        <img src="https://picsum.photos/50/50?random=7" alt="תמונה של לקוח" class="rounded-full mr-4">
+                        <div>
+                            <p class="font-semibold">שרה לוי</p>
+                            <p class="text-sm text-gray-500">בעלים, סטודיו לעיצוב</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <p class="text-gray-700 mb-4">"הייעוץ הטכנולוגי שלהם היה חיוני להצלחת הפרויקט שלנו."</p>
+                    <div class="flex items-center">
+                        <img src="https://picsum.photos/50/50?random=8" alt="תמונה של לקוח" class="rounded-full mr-4">
+                        <div>
+                            <p class="font-semibold">דוד יוסף</p>
+                            <p class="text-sm text-gray-500">מנהל פרויקט, חברת ABC</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Us Section -->
+    <section id="contact" class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-semibold mb-8 text-center">צרו קשר</h2>
+            <div class="max-w-lg mx-auto">
+                <form class="space-y-4">
+                    <div>
+                        <label for="name" class="block text-gray-700 text-sm font-bold mb-2 text-right">שם:</label>
+                        <input type="text" id="name"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-right">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-gray-700 text-sm font-bold mb-2 text-right">אימייל:</label>
+                        <input type="email" id="email"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-right">
+                    </div>
+                    <div>
+                        <label for="message"
+                            class="block text-gray-700 text-sm font-bold mb-2 text-right">הודעה:</label>
+                        <textarea id="message" rows="4"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-right"></textarea>
+                    </div>
+                    <div class="text-center">
+                        <button
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                            type="submit">
+                            שלח
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <h4 class="text-xl font-semibold mb-2">עמודים</h4>
+                    <ul class="text-gray-300">
+                        <li><a href="#" class="hover:text-white">בית</a></li>
+                        <li><a href="#" class="hover:text-white">אודות</a></li>
+                        <li><a href="#" class="hover:text-white">שירותים</a></li>
+                        <li><a href="#" class="hover:text-white">צור קשר</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold mb-2">שירותים</h4>
+                    <ul class="text-gray-300">
+                        <li><a href="#" class="hover:text-white">פיתוח תוכנה</a></li>
+                        <li><a href="#" class="hover:text-white">שיווק דיגיטלי</a></li>
+                        <li><a href="#" class="hover:text-white">ייעוץ טכנולוגי</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold mb-2">עקבו אחרינו</h4>
+                    <ul class="text-gray-300">
+                        <li><a href="#" class="hover:text-white">פייסבוק</a></li>
+                        <li><a href="#" class="hover:text-white">טוויטר</a></li>
+                        <li><a href="#" class="hover:text-white">לינקדאין</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="border-gray-700 my-4">
+            <p class="text-center">&copy; 2024 כל הזכויות שמורות</p>
+        </div>
+    </footer>
+
+</body>
+
+</html>

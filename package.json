@@ -2,7 +2,7 @@
     "name": "md-translator",
     "displayName": "Markdown Translator Preview",
     "description": "Shows a translated preview of Markdown files without modifying the original file, including a summary.",
-    "version": "0.1.8",
+    "version": "0.2.2",
     "repository": {
         "type": "git",
         "url": "https://github.com/EitanBaron/Antigravity-MDTranslatorExt"
@@ -31,6 +31,11 @@
                 "command": "md-translator.devCreate",
                 "title": "Dev Create",
                 "icon": "$(repo-create)"
+            },
+            {
+                "command": "md-translator.devUpgrade",
+                "title": "Dev Upgrade",
+                "icon": "$(zap)"
             }
         ],
         "configuration": {
@@ -168,6 +173,12 @@
                     "default": "vanilla js",
                     "description": "Target language/framework for development analysis and creation.",
                     "order": 14
+                },
+                "md-translator.devCreatePath": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Custom path or folder name where Dev Create files should be saved (absolute or relative to workspace).",
+                    "order": 15
                 }
             }
         },
@@ -181,12 +192,17 @@
                 {
                     "command": "md-translator.devAnalysis",
                     "group": "navigation",
-                    "when": "resourceExtname =~ /\\.(ts|js|py|tsx|jsx|go|cs|cpp|c|java)/"
+                    "when": "md-translator.isDevFile"
                 },
                 {
                     "command": "md-translator.devCreate",
                     "group": "navigation",
-                    "when": "resourceExtname =~ /\\.(prompt|txt|md)/"
+                    "when": "md-translator.isCreateFile"
+                },
+                {
+                    "command": "md-translator.devUpgrade",
+                    "group": "navigation",
+                    "when": "md-translator.isDevFile"
                 }
             ]
         }
