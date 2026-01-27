@@ -2,15 +2,24 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { AiService } from './AiService';
 import { FileFilter } from './FileFilter';
+import { SidebarProvider } from './SidebarProvider';
 
 let aiService: AiService;
 let fileFilter: FileFilter;
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('MD Translator: Activating...');
+    console.log('Aion: Activating...');
     try {
         aiService = new AiService();
         fileFilter = new FileFilter();
+
+        const sidebarProvider = new SidebarProvider(context.extensionUri, aiService);
+        context.subscriptions.push(
+            vscode.window.registerWebviewViewProvider(
+                SidebarProvider.viewType,
+                sidebarProvider
+            )
+        );
 
         // Initial load of settings
         fileFilter.loadSettings().then(() => {
@@ -40,10 +49,10 @@ export function activate(context: vscode.ExtensionContext) {
         });
 
         updateContextKeys();
-        console.log('MD Translator: Listeners established.');
+        console.log('Aion: Listeners established.');
     } catch (e) {
-        console.error('MD Translator: Activation error:', e);
-        vscode.window.showErrorMessage('MD Translator: Activation failed. See console for details.');
+        console.error('Aion: Activation error:', e);
+        vscode.window.showErrorMessage('Aion: Activation failed. See console for details.');
     }
 
     const disposableShowPreview = vscode.commands.registerCommand(
