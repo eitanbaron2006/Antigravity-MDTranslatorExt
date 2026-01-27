@@ -4,375 +4,861 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>דף נחיתה מרשים</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>FlowSync - ניהול פרויקטים חכם לצוותים מבוזרים</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Assistant:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <style>
-        /* General Styles */
-        body {
-            font-family: sans-serif;
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #0A2540;
+            --accent: #00D4AA;
+            --accent-dark: #00B890;
+            --text-primary: #1a1a1a;
+            --text-secondary: #5e5e5e;
+            --bg-light: #F8FAFB;
+            --bg-white: #ffffff;
+            --border: #E3E8EF;
+            --shadow: rgba(10, 37, 64, 0.08);
+        }
+
+        body {
+            font-family: 'Assistant', 'Heebo', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-white);
+            -webkit-font-smoothing: antialiased;
+        }
+
         .container {
-            width: 90%;
             max-width: 1200px;
             margin: 0 auto;
+            padding: 0 24px;
         }
 
-        /* Top Menu Styles */
-        .top-menu {
-            background-color: rgba(59, 130, 246, 0.9);
-            /* Blue with transparency */
-            position: fixed;
+        /* Header */
+        header {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
             top: 0;
-            left: 0;
-            width: 100%;
             z-index: 1000;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
         }
 
-        .top-menu .container {
+        nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem;
+            padding: 20px 0;
         }
 
-        .top-menu .logo a {
-            color: white;
-            text-decoration: none;
-            font-size: 1.5rem;
-            font-weight: bold;
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--primary);
+            font-family: 'Heebo', sans-serif;
+            letter-spacing: -0.5px;
         }
 
-        .top-menu nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
+        .nav-cta {
             display: flex;
-        }
-
-        .top-menu nav ul li {
-            margin-left: 20px;
-        }
-
-        .top-menu nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s ease;
-        }
-
-        .top-menu nav ul li a:hover {
-            color: gold;
-        }
-
-        /* Hero Section Styles */
-        .hero {
-            background-image: url('https://picsum.photos/1920/1080?random=1');
-            background-size: cover;
-            background-position: center;
-            height: 600px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            gap: 16px;
             align-items: center;
-            color: white;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            text-decoration: none;
+            display: inline-block;
             text-align: center;
+            font-family: 'Assistant', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 212, 170, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 170, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 100px 0 120px;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #FFFFFF 100%);
             position: relative;
-            /* For the overlay */
-            margin-top: 60px;
-            /* Prevent overlap with fixed menu */
+            overflow: hidden;
         }
 
         .hero::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            /* Semi-transparent overlay */
-            z-index: 1;
+            top: -50%;
+            left: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 212, 170, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate(50px, 30px) scale(1.1);
+            }
         }
 
         .hero-content {
+            max-width: 680px;
             position: relative;
-            z-index: 2;
-            /* Ensure text is above overlay */
-            padding: 20px;
+            z-index: 1;
         }
 
         .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            font-size: 56px;
+            font-weight: 900;
+            line-height: 1.15;
+            color: var(--primary);
+            margin-bottom: 24px;
+            font-family: 'Heebo', sans-serif;
+            letter-spacing: -1px;
+            animation: fadeInUp 0.8s ease-out;
         }
 
-        .hero p {
-            font-size: 1.5rem;
+        .hero .subheadline {
+            font-size: 22px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            line-height: 1.6;
+            font-weight: 400;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
         }
 
-        /* Feature Image Styles */
-        .feature-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        .hero-cta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease-out 0.4s backwards;
         }
 
-        /* Rest of your existing styles */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .trust-badge {
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 14px;
+            animation: fadeInUp 0.8s ease-out 0.6s backwards;
+        }
+
+        /* Section Styles */
+        section {
+            padding: 100px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 60px;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-family: 'Heebo', sans-serif;
+            letter-spacing: -0.5px;
+        }
+
+        .section-subtitle {
+            font-size: 19px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Problem Section */
+        .problem-section {
+            background: var(--primary);
+            color: white;
+        }
+
+        .problem-section .section-label {
+            color: var(--accent);
+        }
+
+        .problem-section .section-title {
+            color: white;
+        }
+
+        .problem-section .section-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin-bottom: 48px;
+        }
+
+        .problem-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 32px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .problem-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .problem-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .problem-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: white;
+        }
+
+        .problem-card p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .solution-box {
+            background: var(--accent);
+            padding: 40px;
+            border-radius: 16px;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        .solution-box h3 {
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 16px;
+        }
+
+        .solution-box p {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* Benefits Section */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+        }
+
+        .benefit-card {
+            position: relative;
+            padding-top: 32px;
+        }
+
+        .benefit-number {
+            position: absolute;
+            top: 0;
+            right: 50%;
+            transform: translateX(50%);
+            width: 48px;
+            height: 48px;
+            background: var(--accent);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0, 212, 170, 0.2);
+        }
+
+        .benefit-card h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+            padding-top: 16px;
+            text-align: center;
+        }
+
+        .benefit-card p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .benefit-metric {
+            display: inline-block;
+            padding: 8px 16px;
+            background: var(--bg-light);
+            border-radius: 6px;
+            font-weight: 700;
+            color: var(--accent-dark);
+            font-size: 14px;
+        }
+
+        .benefit-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* How It Works */
+        .how-section {
+            background: var(--bg-light);
+        }
+
+        .steps-container {
+            display: flex;
+            gap: 48px;
+            justify-content: center;
+            position: relative;
+        }
+
+        .steps-container::before {
+            content: '';
+            position: absolute;
+            top: 48px;
+            right: 20%;
+            left: 20%;
+            height: 2px;
+            background: var(--border);
+            z-index: 0;
+        }
+
+        .step {
+            flex: 1;
+            max-width: 320px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-number {
+            width: 96px;
+            height: 96px;
+            background: white;
+            border: 4px solid var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 40px;
+            font-weight: 900;
+            color: var(--primary);
+            box-shadow: 0 8px 24px var(--shadow);
+        }
+
+        .step h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .step p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Who It's For */
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        .role-card {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .role-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px var(--shadow);
+        }
+
+        .role-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .role-description {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .role-benefit {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--accent-dark);
+            font-weight: 600;
+        }
+
+        .role-benefit::before {
+            content: '✓';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: var(--accent);
+            color: var(--primary);
+            border-radius: 50%;
+            font-weight: 900;
+            font-size: 12px;
+        }
+
+        /* Trust Section */
+        .trust-section {
+            background: var(--bg-light);
+        }
+
+        .trust-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .trust-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 16px var(--shadow);
+        }
+
+        .trust-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--bg-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+        }
+
+        .trust-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .trust-card p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .logos-placeholder {
+            margin-top: 60px;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px dashed var(--border);
+        }
+
+        .logos-placeholder p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Final CTA */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary) 0%, #0d3659 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .cta-section .section-title {
+            color: white;
+        }
+
+        .cta-section .section-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+        }
+
+        .cta-box {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .friction-reducer {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .friction-reducer::before {
+            content: '✓';
+            color: var(--accent);
+            font-weight: 900;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 40px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero .subheadline {
+                font-size: 18px;
+            }
+
+            .section-title {
+                font-size: 32px;
+            }
+
+            .steps-container {
+                flex-direction: column;
+                gap: 40px;
+            }
+
+            .steps-container::before {
+                display: none;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
-<body class="bg-gray-100 text-gray-800">
-
-    <!-- Top Menu -->
-    <div class="top-menu">
+<body>
+    <!-- Header -->
+    <header>
         <div class="container">
             <nav>
-                <ul>
-                    <li><a href="#vision">החזון שלנו</a></li>
-                    <li><a href="#services">השירותים שלנו</a></li>
-                    <li><a href="#features">תכונות</a></li>
-                    <li><a href="#team">הצוות שלנו</a></li>
-                    <li><a href="#testimonials">מה הלקוחות אומרים</a></li>
-                    <li><a href="#contact">צרו קשר</a></li>
-                </ul>
+                <div class="logo">FlowSync</div>
+                <div class="nav-cta">
+                    <a href="#demo" class="btn btn-primary">קבל הדגמה</a>
+                </div>
             </nav>
-            <div class="logo">
-                <a href="#">הלוגו שלך</a>
-            </div>
         </div>
-    </div>
+    </header>
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-content">
-            <h1 class="text-4xl font-extrabold mb-2">פתרונות הטכנולוגיה המתקדמים ביותר</h1>
-            <p class="text-xl">השותף שלך להצלחה דיגיטלית</p>
-            <button
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded mt-4 focus:outline-none focus:shadow-outline">
-                למידע נוסף
-            </button>
-        </div>
-    </section>
-
-    <!-- Vision Section -->
-    <section id="vision" class="py-16">
-        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-                <h2 class="text-3xl font-semibold mb-6 text-right">החזון שלנו</h2>
-                <p class="mb-6 text-right leading-relaxed">
-                    אנו שואפים להיות חוד החנית של החדשנות הטכנולוגית, לספק פתרונות פורצי דרך שמניעים את העסקים של
-                    לקוחותינו קדימה.
-                    המחויבות שלנו היא לאיכות, שירות לקוחות מעולה ושמירה על סטנדרטים אתיים גבוהים.
-                </p>
-                <button
-                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline"
-                    type="button" aria-label="למידע נוסף">
-                    קרא עוד
-                </button>
-            </div>
-            <div>
-                <img src="https://picsum.photos/640/480?random=2" alt="צוות עבודה" class="feature-image">
-            </div>
-        </div>
-    </section>
-
-    <!-- Services Section -->
-    <section id="services" class="bg-gray-200 py-16">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-semibold mb-8 text-center">השירותים שלנו</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <img src="https://picsum.photos/640/480?random=3" alt="פיתוח תוכנה" class="feature-image mb-4">
-                    <h3 class="text-xl font-semibold mb-2 text-center">פיתוח תוכנה</h3>
-                    <p class="text-gray-700 text-center">פתרונות תוכנה מותאמים אישית לכל סוגי העסקים.</p>
+        <div class="container">
+            <div class="hero-content">
+                <h1>ניהול פרויקטים שמתאים לאופן שבו הצוות שלך עובד</h1>
+                <p class="subheadline">פלטפורמה אחת שמסנכרנת משימות, תקשורת ומועדים בזמן אמת – כך שצוותים מבוזרים יכולים
+                    לספק פרויקטים מהר יותר ללא כאוס</p>
+                <div class="hero-cta">
+                    <a href="#demo" class="btn btn-primary">התחל עם הדגמה בחינם</a>
+                    <a href="#how" class="btn btn-secondary">ראה איך זה עובד</a>
                 </div>
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <img src="https://picsum.photos/640/480?random=4" alt="שיווק דיגיטלי" class="feature-image mb-4">
-                    <h3 class="text-xl font-semibold mb-2 text-center">שיווק דיגיטלי</h3>
-                    <p class="text-gray-700 text-center">הגדלת החשיפה וההמרות של העסק שלך באינטרנט.</p>
-                </div>
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <img src="https://picsum.photos/640/480?random=5" alt="ייעוץ טכנולוגי" class="feature-image mb-4">
-                    <h3 class="text-xl font-semibold mb-2 text-center">ייעוץ טכנולוגי</h3>
-                    <p class="text-gray-700 text-center">ייעוץ מומחה לבחירת הטכנולוגיות המתאימות ביותר.</p>
+                <div class="trust-badge">
+                    ✓ ללא כרטיס אשראי &nbsp;&nbsp; ✓ התקנה תוך 5 דקות &nbsp;&nbsp; ✓ תמיכה בעברית
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="py-16">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-semibold mb-8 text-center">התכונות שלנו</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <i class="fas fa-rocket text-4xl text-blue-500 mb-4"></i>
-                    <h3 class="text-xl font-semibold mb-2">מהירות ויעילות</h3>
-                    <p class="text-gray-700">אנו מספקים פתרונות מהירים ויעילים כדי לעזור לך להשיג את המטרות שלך.</p>
+    <!-- Problem → Solution -->
+    <section class="problem-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">האתגר</span>
+                <h2 class="section-title">צוותים מבוזרים נאבקים עם תיאום</h2>
+                <p class="section-subtitle">כשהצוות עובד מרחוק או במשמרות שונות, מידע חשוב הולך לאיבוד והפרויקטים
+                    מתעכבים</p>
+            </div>
+
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">💬</div>
+                    <h3>תקשורת מפוזרת</h3>
+                    <p>מידע פרוס על פני אימייל, סלאק, ווטסאפ ופגישות – אף אחד לא יודע מה הסטטוס האמיתי</p>
                 </div>
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <i class="fas fa-shield-alt text-4xl text-green-500 mb-4"></i>
-                    <h3 class="text-xl font-semibold mb-2">אבטחה מתקדמת</h3>
-                    <p class="text-gray-700">אנו משתמשים בטכנולוגיות אבטחה מתקדמות כדי להגן על הנתונים שלך.</p>
+                <div class="problem-card">
+                    <div class="problem-icon">⏰</div>
+                    <h3>אובדן זמן על עדכונים</h3>
+                    <p>מנהלים מבזבזים שעות על פגישות סטטוס במקום לקדם את העבודה קדימה</p>
                 </div>
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <i class="fas fa-chart-line text-4xl text-purple-500 mb-4"></i>
-                    <h3 class="text-xl font-semibold mb-2">ניתוח נתונים</h3>
-                    <p class="text-gray-700">אנו מספקים ניתוח נתונים מעמיק כדי לעזור לך לקבל החלטות מושכלות.</p>
+                <div class="problem-card">
+                    <div class="problem-icon">🔥</div>
+                    <h3>שריפות בדקה ה-90</h3>
+                    <p>בעיות מתגלות מאוחר מדי כי אין שקיפות בזמן אמת על התקדמות הפרויקט</p>
+                </div>
+            </div>
+
+            <div class="solution-box">
+                <h3>FlowSync מרכז הכל במקום אחד</h3>
+                <p>פלטפורמה אחת שמעדכנת אוטומטית את כולם, מזהה חסימות לפני שהן הופכות לבעיות, ושומרת על הצוות מסונכרן –
+                    גם אם הם לא מקוונים באותו זמן</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Benefits -->
+    <section class="benefits-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">יתרונות מרכזיים</span>
+                <h2 class="section-title">תוצאות עסקיות מדידות</h2>
+                <p class="section-subtitle">לא רק כלי נוסף – פתרון שמשפיע ישירות על התוצרים שלך</p>
+            </div>
+
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-number">1</div>
+                    <h3>חיסכון של 8 שעות בשבוע למנהל</h3>
+                    <p>דוחות סטטוס אוטומטיים ועדכונים בזמן אמת מבטלים את הצורך בפגישות עדכון אינסופיות ושרשורי אימייל
+                    </p>
+                    <span class="benefit-metric">32 שעות חזרה לחודש</span>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-number">2</div>
+                    <h3>מסירת פרויקטים מהירה יותר ב-30%</h3>
+                    <p>זיהוי וטיפול בחסימות אוטומטי מונע עיכובים ושומר על הפרויקטים במסלול</p>
+                    <span class="benefit-metric">פחות החמצת דדליינים</span>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-number">3</div>
+                    <h3>הפחתת סיכוני תקשורת</h3>
+                    <p>מקור אמת אחד מבטיח שכל בעלי העניין רואים את אותו מידע, מונע אי-התאמות יקרות</p>
+                    <span class="benefit-metric">ביקורת מלאה</span>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-number">4</div>
+                    <h3>הטמעה מהירה לצוות</h3>
+                    <p>ממשק אינטואיטיבי ואינטגרציות עם הכלים הקיימים שלך אומרים שהצוות מתחיל להשתמש מיד</p>
+                    <span class="benefit-metric">פעיל תוך יום אחד</span>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-number">5</div>
+                    <h3>נתונים לקבלת החלטות</h3>
+                    <p>דשבורדים ברורים מראים לך בדיוק איפה משאבים נתקעים ואיך לייעל תהליכים</p>
+                    <span class="benefit-metric">תובנות מבוססות נתונים</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Team Section -->
-    <section id="team" class="bg-gray-200 py-16">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-semibold mb-8 text-center">הצוות שלנו</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <img src="https://picsum.photos/200/200?random=9" alt="תמונה של חבר צוות"
-                        class="rounded-full mx-auto mb-4">
-                    <h3 class="text-xl font-semibold mb-2 text-center">אבי כהן</h3>
-                    <p class="text-gray-700 text-center">מנכ"ל</p>
+    <!-- How It Works -->
+    <section id="how" class="how-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">איך זה עובד</span>
+                <h2 class="section-title">התחל תוך 3 צעדים פשוטים</h2>
+                <p class="section-subtitle">מההתקנה להשפעה בפחות מיום אחד</p>
+            </div>
+
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>חבר את הכלים הקיימים שלך</h3>
+                    <p>סנכרן עם Slack, Google Workspace, Jira או כל כלי שהצוות שלך כבר משתמש בו. ללא צורך לשנות תהליכים
+                    </p>
                 </div>
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <img src="https://picsum.photos/200/200?random=10" alt="תמונה של חבר צוות"
-                        class="rounded-full mx-auto mb-4">
-                    <h3 class="text-xl font-semibold mb-2 text-center">שרה לוי</h3>
-                    <p class="text-gray-700 text-center">סמנכ"לית שיווק</p>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>הגדר את הפרויקטים שלך</h3>
+                    <p>הוסף את הצוותים, המשימות והדדליינים שלך. המערכת לומדת את זרימת העבודה שלך ומתאימה את עצמה</p>
                 </div>
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <img src="https://picsum.photos/200/200?random=11" alt="תמונה של חבר צוות"
-                        class="rounded-full mx-auto mb-4">
-                    <h3 class="text-xl font-semibold mb-2 text-center">דוד יוסף</h3>
-                    <p class="text-gray-700 text-center">מנהל פיתוח</p>
-                </div>
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <img src="https://picsum.photos/200/200?random=12" alt="תמונה של חבר צוות"
-                        class="rounded-full mx-auto mb-4">
-                    <h3 class="text-xl font-semibold mb-2 text-center">רחל מזרחי</h3>
-                    <p class="text-gray-700 text-center">מעצבת UX/UI</p>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>תן למערכת לעבוד</h3>
+                    <p>FlowSync מעדכן אוטומטית סטטוסים, מזהה חסימות ומתריע בדיוק למי שצריך. אתה נשאר ממוקד על העבודה
+                        שחשובה</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="py-16 bg-gray-100">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-semibold mb-8 text-center">מה הלקוחות שלנו אומרים</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <p class="text-gray-700 mb-4">"השירות שלהם היה יוצא מן הכלל! הם עזרו לנו להגדיל את המכירות שלנו
-                        ב-50%."</p>
-                    <div class="flex items-center">
-                        <img src="https://picsum.photos/50/50?random=6" alt="תמונה של לקוח" class="rounded-full mr-4">
-                        <div>
-                            <p class="font-semibold">אבי כהן</p>
-                            <p class="text-sm text-gray-500">מנכ"ל, חברת XYZ</p>
-                        </div>
-                    </div>
+    <!-- Who It's For -->
+    <section class="roles-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">למי זה מתאים</span>
+                <h2 class="section-title">נבנה לתפקידים שמפעילים פרויקטים</h2>
+                <p class="section-subtitle">כל תפקיד מקבל בדיוק את מה שהוא צריך</p>
+            </div>
+
+            <div class="roles-grid">
+                <div class="role-card">
+                    <div class="role-title">👔 מנכ"לים ומייסדים</div>
+                    <p class="role-description">דאגה לגבי האם הצוות מסונכרן וממוקד על הדברים הנכונים</p>
+                    <div class="role-benefit">שקיפות מלאה בלי לנהל במיקרו</div>
                 </div>
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <p class="text-gray-700 mb-4">"הצוות שלהם מקצועי ואדיב, הם תמיד זמינים לעזור בכל שאלה."</p>
-                    <div class="flex items-center">
-                        <img src="https://picsum.photos/50/50?random=7" alt="תמונה של לקוח" class="rounded-full mr-4">
-                        <div>
-                            <p class="font-semibold">שרה לוי</p>
-                            <p class="text-sm text-gray-500">בעלים, סטודיו לעיצוב</p>
-                        </div>
-                    </div>
+                <div class="role-card">
+                    <div class="role-title">💻 מנהלי טכנולוגיה (CTO)</div>
+                    <p class="role-description">צריך לספק פיצ'רים מהר יותר בלי להגדיל את הצוות</p>
+                    <div class="role-benefit">זיהוי חסימות לפני שהן מעכבות ספרינטים</div>
                 </div>
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <p class="text-gray-700 mb-4">"הייעוץ הטכנולוגי שלהם היה חיוני להצלחת הפרויקט שלנו."</p>
-                    <div class="flex items-center">
-                        <img src="https://picsum.photos/50/50?random=8" alt="תמונה של לקוח" class="rounded-full mr-4">
-                        <div>
-                            <p class="font-semibold">דוד יוסף</p>
-                            <p class="text-sm text-gray-500">מנהל פרויקט, חברת ABC</p>
-                        </div>
-                    </div>
+                <div class="role-card">
+                    <div class="role-title">📊 מנהלי מוצר</div>
+                    <p class="role-description">מתקשה לתאם בין פיתוח, עיצוב ובעלי עניין</p>
+                    <div class="role-benefit">כולם רואים את אותה מפת דרכים ועדיפויות</div>
+                </div>
+                <div class="role-card">
+                    <div class="role-title">⚙️ מנהלי תפעול</div>
+                    <p class="role-description">רוצה לייעל תהליכים אבל חסר נתונים</p>
+                    <div class="role-benefit">מטריקות ברורות על זמני מחזור וצווארי בקבוק</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Contact Us Section -->
-    <section id="contact" class="py-16">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-semibold mb-8 text-center">צרו קשר</h2>
-            <div class="max-w-lg mx-auto">
-                <form class="space-y-4">
-                    <div>
-                        <label for="name" class="block text-gray-700 text-sm font-bold mb-2 text-right">שם:</label>
-                        <input type="text" id="name"
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-right">
-                    </div>
-                    <div>
-                        <label for="email" class="block text-gray-700 text-sm font-bold mb-2 text-right">אימייל:</label>
-                        <input type="email" id="email"
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-right">
-                    </div>
-                    <div>
-                        <label for="message"
-                            class="block text-gray-700 text-sm font-bold mb-2 text-right">הודעה:</label>
-                        <textarea id="message" rows="4"
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-right"></textarea>
-                    </div>
-                    <div class="text-center">
-                        <button
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            type="submit">
-                            שלח
-                        </button>
-                    </div>
-                </form>
+    <!-- Trust & Credibility -->
+    <section class="trust-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">אמון ואבטחה</span>
+                <h2 class="section-title">נבנה לעסקים רציניים</h2>
+                <p class="section-subtitle">המידע שלך מאובטח, והמערכת שלך תמיד זמינה</p>
+            </div>
+
+            <div class="trust-grid">
+                <div class="trust-card">
+                    <div class="trust-icon">🔒</div>
+                    <h3>אבטחת Enterprise</h3>
+                    <p>הצפנה מקצה לקצה, SOC 2 Type II, GDPR מלא. הנתונים שלך מוגנים תמיד</p>
+                </div>
+                <div class="trust-card">
+                    <div class="trust-icon">⚡</div>
+                    <h3>זמינות של 99.9%</h3>
+                    <p>תשתית מבוזרת עם גיבויים אוטומטיים. הצוות שלך תמיד יכול לגשת</p>
+                </div>
+                <div class="trust-card">
+                    <div class="trust-icon">🔌</div>
+                    <h3>אינטגרציות נרחבות</h3>
+                    <p>מתחבר לכלים שאתה כבר משתמש בהם – Slack, Google, Microsoft, Jira, GitHub ועוד</p>
+                </div>
+            </div>
+
+            <div class="logos-placeholder">
+                <p>מקום ללוגואים של לקוחות מרכזיים</p>
             </div>
         </div>
     </section>
 
-    <footer class="bg-gray-800 text-white py-6">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <h4 class="text-xl font-semibold mb-2">עמודים</h4>
-                    <ul class="text-gray-300">
-                        <li><a href="#" class="hover:text-white">בית</a></li>
-                        <li><a href="#" class="hover:text-white">אודות</a></li>
-                        <li><a href="#" class="hover:text-white">שירותים</a></li>
-                        <li><a href="#" class="hover:text-white">צור קשר</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-xl font-semibold mb-2">שירותים</h4>
-                    <ul class="text-gray-300">
-                        <li><a href="#" class="hover:text-white">פיתוח תוכנה</a></li>
-                        <li><a href="#" class="hover:text-white">שיווק דיגיטלי</a></li>
-                        <li><a href="#" class="hover:text-white">ייעוץ טכנולוגי</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-xl font-semibold mb-2">עקבו אחרינו</h4>
-                    <ul class="text-gray-300">
-                        <li><a href="#" class="hover:text-white">פייסבוק</a></li>
-                        <li><a href="#" class="hover:text-white">טוויטר</a></li>
-                        <li><a href="#" class="hover:text-white">לינקדאין</a></li>
-                    </ul>
-                </div>
+    <!-- Final CTA -->
+    <section id="demo" class="cta-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">מוכן לעבוד בצורה חכמה יותר?</h2>
+                <p class="section-subtitle">הצטרף למאות חברות שכבר מספקות פרויקטים מהר יותר עם FlowSync</p>
             </div>
-            <hr class="border-gray-700 my-4">
-            <p class="text-center">&copy; 2024 כל הזכויות שמורות</p>
+
+            <div class="cta-box">
+                <a href="#" class="btn btn-primary" style="font-size: 18px; padding: 18px 48px;">קבל הדגמה אישית
+                    בחינם</a>
+                <div class="friction-reducer">התקנה תוך 5 דקות בלי כרטיס אשראי</div>
+                <div class="friction-reducer">תראה תוצאות תוך שבוע ראשון</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>© 2025 FlowSync. כל הזכויות שמורות.</p>
         </div>
     </footer>
-
 </body>
 
 </html>

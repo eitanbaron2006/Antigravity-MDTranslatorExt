@@ -38,18 +38,27 @@ export class FileFilter {
     private loadPatterns(entries: string[], workspaceRoot: string): string[] {
         const result: string[] = [];
         for (const entry of entries) {
+            // If it's explicitly a glob or a path with slashes (that doesn't start with dot), treat as pattern
             if (entry.includes('*') || (entry.includes('/') && !entry.startsWith('.'))) {
                 result.push(entry);
                 continue;
             }
+
             const fullPath = path.join(workspaceRoot, entry);
-            if (fs.existsSync(fullPath)) {
+
+            // Refined Heuristic:
+            // Only read file content if it starts with '.' (e.g. .gitignore, .linecounterinclude)
+            // AND the file exists.
+            // This prevents files like 'LICENSE' or 'package.json' from being parsed as pattern lists.
+            // Instead, they are treated as direct matching patterns for themselves.
+            if (entry.startsWith('.') && fs.existsSync(fullPath)) {
                 try {
                     const content = fs.readFileSync(fullPath, 'utf-8');
                     const patterns = content.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
                     result.push(...patterns);
                 } catch (e) { /* ignore */ }
             } else {
+                // Treat as a direct pattern (e.g., "LICENSE", "Makefile")
                 result.push(entry);
             }
         }
@@ -65,12 +74,18 @@ export class FileFilter {
         if (!workspaceFolders) return { allowed: true };
         const workspaceRoot = workspaceFolders[0].uri.fsPath;
 
-        if (this.isIgnored(filePath, workspaceRoot)) {
-            return { allowed: false, reason: 'File ignored by patterns' };
+        // For 'translate' zone with Whitelist Active, we prioritize the whitelist (Override Ignore)
+        // This allows users to translate specific files (like artifacts in hidden folders) if they explicitly include them.
+        if (zone === 'translate' && this.whitelistActive) {
+            if (this.isIncluded(filePath, workspaceRoot, this.includePatterns)) {
+                return { allowed: true };
+            }
+            return { allowed: false, reason: 'File not matched by whitelist patterns' };
         }
 
-        if (zone === 'translate' && this.whitelistActive && !this.isIncluded(filePath, workspaceRoot, this.includePatterns)) {
-            return { allowed: false, reason: 'File not matched by whitelist patterns' };
+        // For all other cases, or if Whitelist is inactive, Ignore list takes precedence (Security/Noise reduction)
+        if (this.isIgnored(filePath, workspaceRoot)) {
+            return { allowed: false, reason: 'File ignored by patterns' };
         }
 
         if ((zone === 'analysis' || zone === 'upgrade') && !this.isIncluded(filePath, workspaceRoot, this.devAnalysisPatterns)) {

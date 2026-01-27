@@ -2,7 +2,7 @@
     "name": "md-translator",
     "displayName": "Markdown Translator Preview",
     "description": "Shows a translated preview of Markdown files without modifying the original file, including a summary.",
-    "version": "0.2.2",
+    "version": "0.2.7",
     "repository": {
         "type": "git",
         "url": "https://github.com/EitanBaron/Antigravity-MDTranslatorExt"
@@ -187,7 +187,7 @@
                 {
                     "command": "md-translator.showPreview",
                     "group": "navigation",
-                    "when": "resourceLangId == markdown"
+                    "when": "md-translator.isTranslateFile"
                 },
                 {
                     "command": "md-translator.devAnalysis",

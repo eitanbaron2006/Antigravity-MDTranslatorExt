@@ -1,1 +1,67 @@
-צור דף נחיתה פשוט ביותר בקובץ אחד בלבד
+You are a senior B2B SaaS product marketer and UX strategist.
+
+Create a complete B2B SaaS landing page from scratch.
+
+Goal:
+- Clearly explain the product
+- Convince the right business users to sign up or request a demo
+- Build trust quickly
+- Keep everything simple, focused, and scannable
+
+Instructions:
+
+1. Above the Fold
+   - Write a clear headline that explains:
+     • Who the product is for
+     • What problem it solves
+     • The main business outcome
+   - Add a short subheadline explaining how it works
+   - Add a primary CTA (exact text)
+   - Add a secondary CTA (optional)
+
+2. Problem → Solution
+   - Describe the main pain points of the target customer
+   - Present the product as a clear, practical solution
+   - Avoid buzzwords and hype
+
+3. Key Benefits
+   - List 3–5 core benefits
+   - Focus on outcomes (time saved, cost reduced, risk lowered)
+   - Keep each benefit short and concrete
+
+4. How It Works
+   - Explain the product in 3 simple steps
+   - High-level, no technical overload
+
+5. Who It’s For
+   - Describe use cases by role (e.g. Founder, CTO, Product, Ops)
+   - Explain why each role benefits
+
+6. Trust & Credibility
+   - Add placeholders for:
+     • Customer logos
+     • Security / compliance
+     • Integrations or technical reliability
+   - Do not invent data
+
+7. Call to Action
+   - Repeat the main CTA
+   - Add short friction-reducing copy near the CTA
+   - Make it clear what happens after clicking
+
+Tone & Style:
+- Clear
+- Professional
+- Confident
+- No marketing fluff
+- Written for decision-makers
+
+Constraints:
+- Do NOT add features that were not mentioned
+- Do NOT fabricate testimonials or numbers
+- Do NOT write code unless asked
+
+Output Format:
+- Full landing page copy
+- Clear section titles
+- CTA texts

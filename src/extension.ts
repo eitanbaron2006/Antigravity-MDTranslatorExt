@@ -265,36 +265,68 @@ async function handleDevUpgrade(
     doc: vscode.TextDocument,
     context: vscode.ExtensionContext
 ) {
-    const userPrompt = await vscode.window.showInputBox({
-        prompt: "Instructions for AI Upgrade (optional)",
-        placeHolder: "e.g., Use async/await, add error handling, make it more readable..."
-    });
+    const config = vscode.workspace.getConfiguration('md-translator');
+    const targetLang = config.get<string>('language') || 'en';
+    const isRTL = ['he', 'ar', 'fa', 'ur'].includes(targetLang.toLowerCase());
 
-    if (userPrompt === undefined) return; // Cancelled
+    const labels = isRTL ? {
+        title: "שדרוג קוד עם AI",
+        placeholder: "תאר את השינויים שברצונך לבצע... (לדוגמה: הוסף טיפול בשגיאות)",
+        upgrade: "שדרג קוד",
+        cancel: "ביטול"
+    } : {
+        title: "AI Code Upgrade",
+        placeholder: "Describe the changes you want to make... (e.g., Add error handling)",
+        upgrade: "Upgrade Code",
+        cancel: "Cancel"
+    };
 
-    await vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        title: "Upgrading code...",
-        cancellable: false
-    }, async () => {
-        try {
-            const editor = vscode.window.activeTextEditor;
-            if (!editor) return;
+    const panel = vscode.window.createWebviewPanel(
+        'mdDevUpgrade',
+        labels.title,
+        vscode.ViewColumn.Beside,
+        { enableScripts: true }
+    );
 
-            const text = doc.getText();
-            const result = await aiService.upgradeCode(text, userPrompt);
+    panel.webview.html = getUpgradePromptWebviewContent(isRTL, labels);
 
-            const edit = new vscode.WorkspaceEdit();
-            const fullRange = new vscode.Range(
-                doc.positionAt(0),
-                doc.positionAt(text.length)
-            );
-            edit.replace(doc.uri, fullRange, result);
-            await vscode.workspace.applyEdit(edit);
+    panel.webview.onDidReceiveMessage(async (message: any) => {
+        if (message.command === 'submitPrompt') {
+            const userPrompt = message.text;
+            panel.dispose();
 
-            vscode.window.showInformationMessage('Code upgraded!');
-        } catch (error) {
-            vscode.window.showErrorMessage(`Upgrade failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            if (!userPrompt) return;
+
+            vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: isRTL ? "משדרג קוד..." : "Upgrading code...",
+                cancellable: false
+            }, async () => {
+                try {
+                    // We don't need to check for activeTextEditor here because we have 'doc' from the closure.
+                    // Checking activeTextEditor after panel.dispose() can fail if focus is in transition.
+
+                    const text = doc.getText();
+                    const upgradeResult = await aiService.upgradeCode(text, userPrompt);
+
+                    const edit = new vscode.WorkspaceEdit();
+                    const fullRange = new vscode.Range(
+                        doc.positionAt(0),
+                        doc.positionAt(text.length)
+                    );
+
+                    edit.replace(doc.uri, fullRange, upgradeResult);
+                    const applied = await vscode.workspace.applyEdit(edit);
+
+                    if (applied) {
+                        vscode.window.showInformationMessage(isRTL ? "הקוד שודרג בהצלחה!" : "Code upgraded successfully!");
+                    }
+                } catch (error: any) {
+                    vscode.window.showErrorMessage(`Error: ${error.message}`);
+                }
+            });
+        } else if (message.command === 'cancel') {
+            panel.dispose();
         }
     });
 }
@@ -507,6 +539,7 @@ function escapeHtml(text: string): string {
 async function updateContextKeys() {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
+        vscode.commands.executeCommand('setContext', 'md-translator.isTranslateFile', false);
         vscode.commands.executeCommand('setContext', 'md-translator.isDevFile', false);
         vscode.commands.executeCommand('setContext', 'md-translator.isCreateFile', false);
         return;
@@ -514,11 +547,121 @@ async function updateContextKeys() {
 
     const filePath = editor.document.uri.fsPath;
 
+    const isTranslate = fileFilter.isAllowed(filePath, 'translate').allowed;
     const isDev = fileFilter.isAllowed(filePath, 'analysis').allowed;
     const isCreate = fileFilter.isAllowed(filePath, 'create').allowed;
 
+    vscode.commands.executeCommand('setContext', 'md-translator.isTranslateFile', isTranslate);
     vscode.commands.executeCommand('setContext', 'md-translator.isDevFile', isDev);
     vscode.commands.executeCommand('setContext', 'md-translator.isCreateFile', isCreate);
+}
+
+function getUpgradePromptWebviewContent(isRTL: boolean, labels: any): string {
+    const dir = isRTL ? 'rtl' : 'ltr';
+    const textAlign = isRTL ? 'right' : 'left';
+
+    return `<!DOCTYPE html>
+<html lang="en" dir="${dir}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: var(--vscode-font-family, sans-serif);
+            padding: 20px;
+            color: var(--vscode-foreground);
+            background-color: var(--vscode-editor-background);
+            text-align: ${textAlign};
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        h2 { 
+            color: var(--vscode-textLink-foreground); 
+            margin-top: 0; 
+            font-weight: normal;
+        }
+        textarea {
+            width: 100%;
+            flex-grow: 1;
+            background: var(--vscode-input-background);
+            color: var(--vscode-input-foreground);
+            border: 1px solid var(--vscode-input-border);
+            padding: 10px;
+            font-family: var(--vscode-editor-font-family, monospace);
+            resize: none;
+            outline: none;
+            margin-bottom: 15px;
+            border-radius: 2px;
+        }
+        textarea:focus {
+            border-color: var(--vscode-focusBorder);
+        }
+        .actions {
+            display: flex;
+            justify-content: ${isRTL ? 'flex-start' : 'flex-end'};
+            gap: 10px;
+            margin-bottom: 40px; /* Space from bottom */
+        }
+        button {
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 2px;
+            font-size: 13px;
+        }
+        .btn-primary {
+            background: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+        }
+        .btn-primary:hover {
+            background: var(--vscode-button-hoverBackground);
+        }
+        .btn-secondary {
+            background: var(--vscode-button-secondaryBackground);
+            color: var(--vscode-button-secondaryForeground);
+        }
+        .btn-secondary:hover {
+            background: var(--vscode-button-secondaryHoverBackground);
+        }
+    </style>
+</head>
+<body>
+    <h2>${labels.title}</h2>
+    <textarea id="prompt" placeholder="${labels.placeholder}"></textarea>
+    <div class="actions">
+        <button class="btn-secondary" onclick="cancel()">${labels.cancel}</button>
+        <button class="btn-primary" onclick="submit()">🚀 ${labels.upgrade}</button>
+    </div>
+
+    <script>
+        const vscode = acquireVsCodeApi();
+        const textarea = document.getElementById('prompt');
+        
+        // Focus immediately
+        textarea.focus();
+
+        function submit() {
+            vscode.postMessage({
+                command: 'submitPrompt',
+                text: textarea.value
+            });
+        }
+
+        function cancel() {
+            vscode.postMessage({ command: 'cancel' });
+        }
+
+        // Handle Ctrl+Enter to submit
+        textarea.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                submit();
+            }
+        });
+    </script>
+</body>
+</html>`;
 }
 
 export function deactivate() { }
