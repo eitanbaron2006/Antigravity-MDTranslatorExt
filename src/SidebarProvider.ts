@@ -231,6 +231,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         display: flex;
                         gap: 10px;
                         align-items: center;
+                        position: relative;
                     }
                     .pill {
                         background: rgba(255,255,255,0.05);
@@ -260,34 +261,39 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     /* Dropdowns */
                     .dropdown {
                         position: absolute;
-                        bottom: 100%;
+                        bottom: calc(100% + 6px);
                         left: 0;
-                        background: #252526;
-                        border: 1px solid var(--vscode-focusBorder);
+                        background: #1e1e1e;
+                        border: 1px solid #007acc;
                         border-radius: 6px;
-                        width: 240px;
+                        width: 280px;
                         display: none;
                         flex-direction: column;
                         z-index: 1000;
-                        margin-bottom: 8px;
                         box-shadow: 0 4px 12px rgba(0,0,0,0.5);
                     }
                     .dropdown.show {
                         display: flex;
                     }
                     .dropdown-search {
-                        padding: 8px;
-                        border-bottom: 1px solid var(--aion-border);
+                        padding: 12px 10px 8px;
                     }
                     .dropdown-search input {
                         width: 100%;
-                        background: #3c3c3c;
-                        border: 1px solid #666;
-                        color: white;
-                        padding: 4px 8px;
-                        border-radius: 4px;
-                        font-size: 12px;
+                        background: #313132;
+                        border: 1px solid #454545;
+                        color: #cccccc;
+                        padding: 6px 10px;
+                        border-radius: 2px;
+                        font-size: 13px;
                         box-sizing: border-box;
+                        outline: none;
+                    }
+                    .dropdown-search input::placeholder {
+                        color: #888;
+                    }
+                    .dropdown-search input:focus {
+                        border-color: #007acc;
                     }
                     .dropdown-section-title {
                         padding: 8px 12px 4px;
@@ -305,11 +311,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         font-size: 12px;
                     }
                     .dropdown-item:hover {
-                        background: var(--vscode-list-hoverBackground);
+                        background: rgba(255,255,255,0.05);
                     }
                     .dropdown-item.active {
-                        background: var(--vscode-list-activeSelectionBackground);
-                        color: var(--vscode-list-activeSelectionForeground);
+                        background: #043c5e;
+                        color: #ffffff;
+                    }
+                    .dropdown-item.active .item-desc {
+                        color: rgba(255,255,255,0.8);
+                    }
+                    .dropdown-item.active svg {
+                        color: #ffffff;
                     }
                     .dropdown-item svg {
                         width: 16px;
@@ -319,10 +331,36 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     .dropdown-item div {
                         display: flex;
                         flex-direction: column;
+                        flex: 1;
                     }
                     .dropdown-item .item-desc {
                         font-size: 10px;
                         color: #888;
+                    }
+                    .dropdown-item .item-check {
+                        margin-left: auto;
+                        color: #ffffff;
+                        display: none;
+                    }
+                    .dropdown-item.active .item-check {
+                        display: block;
+                    }
+                    .dropdown-hint {
+                        padding: 8px 12px;
+                        font-size: 10px;
+                        color: #666;
+                        line-height: 1.4;
+                        border-bottom: 1px solid var(--aion-border);
+                    }
+                    .dropdown-footer {
+                        padding: 8px 12px;
+                        border-top: 1px solid var(--aion-border);
+                        font-size: 11px;
+                        color: #888;
+                        cursor: pointer;
+                    }
+                    .dropdown-footer:hover {
+                        color: #ccc;
                     }
 
                     .status-bar {
@@ -378,6 +416,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         <div class="toolbar">
                             <div class="toolbar-left">
                                 <div class="pill" id="mode-trigger">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px;"><polyline points="18 15 12 9 6 15"/></svg>
                                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294l4-13zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0zm6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0z"/></svg>
                                     <span id="active-mode">Code</span>
                                 </div>
@@ -385,38 +424,69 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                                 <!-- Mode Dropdown -->
                                 <div class="dropdown" id="mode-dropdown">
                                     <div class="dropdown-search"><input type="text" placeholder="Search..."></div>
+                                    <div class="dropdown-hint">
+                                        Ctrl + . for next mode, Ctrl + Shift + . for previous mode
+                                    </div>
                                     <div class="dropdown-item" data-mode="Architect">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22v-5M9 7l3 3 3-3M9 17l3-3 3 3M12 2v5"/></svg>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5M9 7l3 3 3-3M9 17l3-3 3 3M12 2v5"/></svg>
                                         <div>
                                             <span>Architect</span>
                                             <span class="item-desc">Plan and design before implementation</span>
                                         </div>
+                                        <svg class="item-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                                     </div>
                                     <div class="dropdown-item active" data-mode="Code">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
                                         <div>
                                             <span>Code</span>
                                             <span class="item-desc">Write, modify, and refactor code</span>
                                         </div>
+                                        <svg class="item-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                                     </div>
                                     <div class="dropdown-item" data-mode="Ask">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                                         <div>
                                             <span>Ask</span>
                                             <span class="item-desc">Get answers and explanations</span>
                                         </div>
+                                        <svg class="item-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                                     </div>
+                                    <div class="dropdown-item" data-mode="Debug">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3.5 7h17M10 12v4M14 12v4M3.5 17h17M8 18v4M16 18v4"/></svg>
+                                        <div>
+                                            <span>Debug</span>
+                                            <span class="item-desc">Diagnose and fix software issues</span>
+                                        </div>
+                                        <svg class="item-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </div>
+                                    <div class="dropdown-item" data-mode="Orchestrator">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/><line x1="12" y1="12" x2="19" y2="12"/></svg>
+                                        <div>
+                                            <span>Orchestrator</span>
+                                            <span class="item-desc">Coordinate tasks across multiple modes</span>
+                                        </div>
+                                        <svg class="item-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </div>
+                                    <div class="dropdown-item" data-mode="Review">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.1l4 4-4 4"/><path d="M3 12.2v-2a4 4 0 0 1 4-4h14M7 21.9l-4-4 4-4"/><path d="M21 11.8v2a4 4 0 0 1-4 4H3"/></svg>
+                                        <div>
+                                            <span>Review</span>
+                                            <span class="item-desc">Review code changes locally</span>
+                                        </div>
+                                        <svg class="item-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </div>
+                                    <div class="dropdown-footer">Edit...</div>
                                 </div>
                             </div>
-                            <div class="toolbar-right">
+                             <div class="toolbar-right">
                                 <div class="icon-btn">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10a10 10 0 0 0 20 0V2h-10z"/><path d="M12 2v20"/><path d="M2 12h20"/></svg>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                 </div>
                                 <div class="icon-btn">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                                 </div>
                                 <div class="icon-btn" onclick="send()" style="color: var(--aion-primary)">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
                                 </div>
                             </div>
                         </div>
@@ -496,20 +566,62 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         const trigger = document.getElementById(triggerId);
                         const dropdown = document.getElementById(dropdownId);
                         const activeLabel = document.getElementById(activeLabelId);
+                        const searchInput = dropdown.querySelector('.dropdown-search input');
 
                         trigger.addEventListener('click', (e) => {
                             e.stopPropagation();
+                            // Close other dropdowns
+                            document.querySelectorAll('.dropdown').forEach(d => {
+                                if (d !== dropdown) d.classList.remove('show');
+                            });
                             dropdown.classList.toggle('show');
+                            if (dropdown.classList.contains('show') && searchInput) {
+                                searchInput.focus();
+                                searchInput.value = '';
+                                filterItems('');
+                            }
                         });
+
+                        function filterItems(query) {
+                            const items = dropdown.querySelectorAll('.dropdown-item');
+                            const q = query.toLowerCase();
+                            items.forEach(item => {
+                                const title = item.querySelector('span')?.textContent.toLowerCase() || "";
+                                if (title.startsWith(q)) {
+                                    item.style.display = 'flex';
+                                } else {
+                                    item.style.display = 'none';
+                                }
+                            });
+                        }
+
+                        if (searchInput) {
+                            searchInput.addEventListener('input', (e) => {
+                                filterItems(e.target.value);
+                            });
+                            searchInput.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                            });
+                        }
 
                         dropdown.querySelectorAll('.dropdown-item').forEach(item => {
                             item.addEventListener('click', () => {
                                 dropdown.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
                                 item.classList.add('active');
                                 const val = item.getAttribute(dataAttr);
-                                if (activeLabel) activeLabel.textContent = val;
+                                if (activeLabel) {
+                                    // Update label but keep icons if present
+                                    const span = activeLabel.parentElement.querySelector('span');
+                                    if (span) span.textContent = val;
+                                    else activeLabel.textContent = val;
+                                }
                                 dropdown.classList.remove('show');
                             });
+                        });
+                        
+                        // Prevent closure when clicking inside dropdown content
+                        dropdown.addEventListener('click', (e) => {
+                            e.stopPropagation();
                         });
                     }
 
