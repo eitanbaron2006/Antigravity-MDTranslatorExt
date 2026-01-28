@@ -85,42 +85,25 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         overflow: hidden;
                     }
                     
-                    /* Header */
-                    .header {
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        padding: 12px 14px;
-                        border-bottom: 1px solid var(--aion-border);
-                    }
-                    .header-title {
-                        font-weight: 600;
-                        font-size: 13px;
-                    }
-                    .header-actions {
-                        display: flex;
-                        gap: 12px;
-                        color: var(--vscode-descriptionForeground);
-                    }
-                    .header-actions svg {
-                        width: 16px;
-                        height: 16px;
-                        cursor: pointer;
-                        opacity: 0.8;
-                    }
-                    .header-actions svg:hover {
-                        opacity: 1;
-                        color: var(--vscode-foreground);
-                    }
-
                     /* Content */
                     .content {
                         flex: 1;
                         overflow-y: auto;
-                        padding: 20px 14px;
+                        padding: 16px 14px;
                         display: flex;
                         flex-direction: column;
-                        gap: 24px;
+                        gap: 20px;
+                        scrollbar-width: thin;
+                    }
+                    
+                    /* RTL Support */
+                    .rtl {
+                        direction: rtl;
+                        text-align: right;
+                    }
+                    .ltr {
+                        direction: ltr;
+                        text-align: left;
                     }
                     
                     .hero {
@@ -190,8 +173,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
                     /* Input Area */
                     .footer {
-                        padding: 12px;
-                        border-top: 1px solid var(--aion-border);
+                        padding: 8px 12px 0 12px;
+                        border-top: none;
                     }
                     .input-container {
                         background: var(--aion-input-bg);
@@ -323,7 +306,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     }
 
                     .status-bar {
-                        padding: 6px 12px;
+                        padding: 4px 12px 8px 12px;
                         font-size: 11px;
                         color: #666;
                         display: flex;
@@ -333,15 +316,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                 </style>
             </head>
             <body>
-                <div class="header">
-                    <div class="header-title">Aion</div>
-                    <div class="header-actions">
-                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
-                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM1 5a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V5zm1 1v8h12V6H2z"/></svg>
-                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M7.5 7.5V3h1v4.5H13v1H7.5V7.5z"/></svg>
-                    </div>
-                </div>
-
                 <div class="content">
                     <div class="hero">
                         Generate, refactor, and debug code with AI assistance. Check out our <a href="#">documentation</a> to learn more.
@@ -371,7 +345,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                 <div class="footer">
                     <div class="input-container">
                         <div class="input-row">
-                            <textarea id="msg" placeholder="Type your task here...
+                            <textarea id="msg" dir="auto" placeholder="Type your task here...
 (@ to add context, / for commands, hold shift to drag in files)"></textarea>
                             <div class="icon-btn" style="margin-top: 5px;">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m3.34 19 1.4-1.4"/><path d="M5.07 15.15 15.15 5.07a2.12 2.12 0 1 1 3 3L8.04 18.15a1 1 0 0 1-.7.29H5.07a1 1 0 0 1-1-1v-2.18a1 1 0 0 1 .29-.7z"/><path d="m14.5 12.5 1-1"/><path d="m3 21 1.4-1.4"/><path d="m18.5 7.5 1-1"/><path d="m10.5 16.5 1-1"/><path d="m5 19 1.4-1.4"/></svg>
@@ -455,9 +429,36 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         const text = msg.value.trim();
                         if (text) {
                             vscode.postMessage({ type: 'sendMessage', value: text });
+                            // For simulation/demo purposes, we clear it and don't yet have addMessage back.
+                            // However, let's restore addMessage listener so user can see their messages.
                             msg.value = '';
                         }
                     }
+
+                    function isHebrew(text) {
+                        const hebrewPattern = /[\u0590-\u05FF]/;
+                        return hebrewPattern.test(text);
+                    }
+
+                    window.addEventListener('message', event => {
+                        const data = event.data;
+                        if (data.type === 'addMessage') {
+                            const chatContent = document.querySelector('.content');
+                            const div = document.createElement('div');
+                            div.className = 'task-card ' + data.role;
+                            
+                            // Detect Hebrew and apply RTL
+                            if (isHebrew(data.text)) {
+                                div.classList.add('rtl');
+                            } else {
+                                div.classList.add('ltr');
+                            }
+
+                            div.innerHTML = \`<div class="task-text">\${data.text}</div>\`;
+                            chatContent.appendChild(div);
+                            chatContent.scrollTop = chatContent.scrollHeight;
+                        }
+                    });
 
                     msg.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {

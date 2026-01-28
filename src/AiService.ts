@@ -3,7 +3,7 @@ import { DEFAULT_SKILLS } from './DefaultSkills';
 
 export class AiService {
     private getSettings() {
-        const config = vscode.workspace.getConfiguration('md-translator');
+        const config = vscode.workspace.getConfiguration('aion');
         return {
             language: config.get<string>('language') || 'en',
             summaryLength: config.get<string>('summaryLength') || 'medium',

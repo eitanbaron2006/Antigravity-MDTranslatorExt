@@ -2,7 +2,7 @@
     "name": "aion",
     "displayName": "Aion",
     "description": "Modern AI Coding Agent for professional development. Full-scale automation and intelligent assistance.",
-    "version": "1.1.0",
+    "version": "1.5.0",
     "icon": "resources/icon.png",
     "repository": {
         "type": "git",
@@ -19,31 +19,51 @@
     "contributes": {
         "commands": [
             {
-                "command": "md-translator.showPreview",
+                "command": "aion.newChat",
+                "title": "New Chat",
+                "icon": "$(add)"
+            },
+            {
+                "command": "aion.openLibrary",
+                "title": "Library",
+                "icon": "$(library)"
+            },
+            {
+                "command": "aion.showHistory",
+                "title": "History",
+                "icon": "$(history)"
+            },
+            {
+                "command": "aion.showSettings",
+                "title": "Settings",
+                "icon": "$(settings-gear)"
+            },
+            {
+                "command": "aion.showPreview",
                 "title": "Translate",
                 "icon": "$(symbol-method)"
             },
             {
-                "command": "md-translator.devAnalysis",
+                "command": "aion.devAnalysis",
                 "title": "Dev Recommendations",
                 "icon": "$(lightbulb)"
             },
             {
-                "command": "md-translator.devCreate",
+                "command": "aion.devCreate",
                 "title": "Dev Create",
                 "icon": "$(repo-create)"
             },
             {
-                "command": "md-translator.devUpgrade",
+                "command": "aion.devUpgrade",
                 "title": "Dev Upgrade",
                 "icon": "$(zap)"
             }
         ],
         "configuration": {
             "type": "object",
-            "title": "Markdown Translator",
+            "title": "Aion",
             "properties": {
-                "md-translator.language": {
+                "aion.language": {
                     "type": "string",
                     "enum": [
                         "en",
@@ -57,13 +77,13 @@
                     "description": "Language for translation and UI elements",
                     "order": 1
                 },
-                "md-translator.summaryLength": {
+                "aion.summaryLength": {
                     "type": "string",
                     "default": "medium",
                     "description": "Length of the summary: short, medium, or long.",
                     "order": 3
                 },
-                "md-translator.aiProvider": {
+                "aion.aiProvider": {
                     "type": "string",
                     "enum": [
                         "Gemini",
@@ -76,31 +96,31 @@
                     "description": "Select the AI provider for translation and analysis.",
                     "order": 4
                 },
-                "md-translator.aiModel": {
+                "aion.aiModel": {
                     "type": "string",
                     "default": "",
                     "description": "Model name (e.g., 'gpt-4o', 'claude-3-5-sonnet', 'grok-code-fast-1'). Leave empty to use provider default.",
                     "order": 5
                 },
-                "md-translator.customUrl": {
+                "aion.customUrl": {
                     "type": "string",
                     "default": "",
                     "description": "Base URL for Custom provider (e.g., 'https://api.openai.com/v1'). Required if provider is Custom.",
                     "order": 6
                 },
-                "md-translator.apiKey": {
+                "aion.apiKey": {
                     "type": "string",
                     "default": "",
                     "description": "API key for the selected AI provider.",
                     "order": 7
                 },
-                "md-translator.ignoreListActive": {
+                "aion.ignoreListActive": {
                     "type": "boolean",
                     "default": true,
                     "description": "Enable/Disable reading patterns from ignore files.",
                     "order": 8
                 },
-                "md-translator.ignoreFiles": {
+                "aion.ignoreFiles": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -113,13 +133,13 @@
                     "description": "List of files to read ignore patterns from (e.g., .gitignore).",
                     "order": 9
                 },
-                "md-translator.whitelistActive": {
+                "aion.whitelistActive": {
                     "type": "boolean",
                     "default": false,
                     "description": "Enable/Disable whitelist mode. Only files matching patterns in the included files will be translatable.",
                     "order": 10
                 },
-                "md-translator.includeFiles": {
+                "aion.includeFiles": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -130,7 +150,7 @@
                     "description": "List of files to read Whitelist (Include) patterns from.",
                     "order": 11
                 },
-                "md-translator.devAnalysisIncludeFiles": {
+                "aion.devAnalysisIncludeFiles": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -145,7 +165,7 @@
                     "description": "Whitelist patterns for Development Recommendations.",
                     "order": 12
                 },
-                "md-translator.devCreateIncludeFiles": {
+                "aion.devCreateIncludeFiles": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -158,7 +178,7 @@
                     "description": "Whitelist patterns for AI Code Generation (Dev Create).",
                     "order": 13
                 },
-                "md-translator.devLang": {
+                "aion.devLang": {
                     "type": "string",
                     "enum": [
                         "python",
@@ -175,20 +195,20 @@
                     "description": "Target language/framework for development analysis and creation.",
                     "order": 14
                 },
-                "md-translator.devCreatePath": {
+                "aion.devCreatePath": {
                     "type": "string",
                     "default": "",
                     "description": "Custom path or folder name where Dev Create files should be saved (absolute or relative to workspace).",
                     "order": 15
                 },
-                "md-translator.devSystemPrompt": {
+                "aion.devSystemPrompt": {
                     "type": "string",
                     "default": "",
                     "edit:multiline": true,
                     "description": "Global instructions sent to AI for every Dev Create or Dev Upgrade request.",
                     "order": 16
                 },
-                "md-translator.useProjectSkills": {
+                "aion.useProjectSkills": {
                     "type": "boolean",
                     "default": true,
                     "description": "Automatically include project-specific skills (from .agent/skills) in AI prompts.",
@@ -210,32 +230,73 @@
                 {
                     "type": "webview",
                     "id": "aion-chat",
-                    "name": "Aion AI",
+                    "name": "Aion",
+                    "icon": "resources/sidebar-icon.svg"
+                }
+            ]
+        },
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "aion-sidebar",
+                    "title": "Aion",
+                    "icon": "resources/sidebar-icon.svg"
+                }
+            ]
+        },
+        "views": {
+            "aion-sidebar": [
+                {
+                    "type": "webview",
+                    "id": "aion-chat",
+                    "name": "Aion",
                     "icon": "resources/sidebar-icon.svg"
                 }
             ]
         },
         "menus": {
+            "view/title": [
+                {
+                    "command": "aion.newChat",
+                    "when": "view == aion-chat",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "aion.openLibrary",
+                    "when": "view == aion-chat",
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "aion.showHistory",
+                    "when": "view == aion-chat",
+                    "group": "navigation@3"
+                },
+                {
+                    "command": "aion.showSettings",
+                    "when": "view == aion-chat",
+                    "group": "navigation@4"
+                }
+            ],
             "editor/title": [
                 {
-                    "command": "md-translator.showPreview",
+                    "command": "aion.showPreview",
                     "group": "navigation",
-                    "when": "md-translator.isTranslateFile"
+                    "when": "aion.isTranslateFile"
                 },
                 {
-                    "command": "md-translator.devAnalysis",
+                    "command": "aion.devAnalysis",
                     "group": "navigation",
-                    "when": "md-translator.isDevFile"
+                    "when": "aion.isDevFile"
                 },
                 {
-                    "command": "md-translator.devCreate",
+                    "command": "aion.devCreate",
                     "group": "navigation",
-                    "when": "md-translator.isCreateFile"
+                    "when": "aion.isCreateFile"
                 },
                 {
-                    "command": "md-translator.devUpgrade",
+                    "command": "aion.devUpgrade",
                     "group": "navigation",
-                    "when": "md-translator.isDevFile"
+                    "when": "aion.isDevFile"
                 }
             ]
         }

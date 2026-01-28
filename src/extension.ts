@@ -30,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Listen for configuration changes
         vscode.workspace.onDidChangeConfiguration(event => {
-            if (event.affectsConfiguration('md-translator')) {
+            if (event.affectsConfiguration('aion')) {
                 fileFilter.refresh();
                 fileFilter.loadSettings().then(() => {
                     updateContextKeys();
@@ -56,7 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     const disposableShowPreview = vscode.commands.registerCommand(
-        'md-translator.showPreview',
+        'aion.showPreview',
         async () => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
@@ -74,7 +74,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     const disposableDevAnalysis = vscode.commands.registerCommand(
-        'md-translator.devAnalysis',
+        'aion.devAnalysis',
         async () => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) return;
@@ -89,7 +89,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     const disposableDevCreate = vscode.commands.registerCommand(
-        'md-translator.devCreate',
+        'aion.devCreate',
         async () => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) return;
@@ -104,7 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     const disposableDevUpgrade = vscode.commands.registerCommand(
-        'md-translator.devUpgrade',
+        'aion.devUpgrade',
         async () => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) return;
@@ -118,14 +118,39 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
-    context.subscriptions.push(disposableShowPreview, disposableDevAnalysis, disposableDevCreate, disposableDevUpgrade);
+    const disposableNewChat = vscode.commands.registerCommand('aion.newChat', () => {
+        vscode.window.showInformationMessage('New Chat started.');
+    });
+
+    const disposableOpenLibrary = vscode.commands.registerCommand('aion.openLibrary', () => {
+        vscode.window.showInformationMessage('Library coming soon.');
+    });
+
+    const disposableShowHistory = vscode.commands.registerCommand('aion.showHistory', () => {
+        vscode.window.showInformationMessage('History coming soon.');
+    });
+
+    const disposableShowSettings = vscode.commands.registerCommand('aion.showSettings', () => {
+        vscode.commands.executeCommand('workbench.action.openSettings', 'aion');
+    });
+
+    context.subscriptions.push(
+        disposableShowPreview,
+        disposableDevAnalysis,
+        disposableDevCreate,
+        disposableDevUpgrade,
+        disposableNewChat,
+        disposableOpenLibrary,
+        disposableShowHistory,
+        disposableShowSettings
+    );
 }
 
 async function showTranslatedPreview(
     doc: vscode.TextDocument,
     context: vscode.ExtensionContext
 ) {
-    const config = vscode.workspace.getConfiguration('md-translator');
+    const config = vscode.workspace.getConfiguration('aion');
     const targetLang = config.get<string>('language') || 'en';
     const originalText = doc.getText();
 
@@ -164,7 +189,7 @@ async function showDevelopmentRecommendations(
     }, async () => {
         try {
             const recommendations = await aiService.getRecommendations(doc.getText());
-            const config = vscode.workspace.getConfiguration('md-translator');
+            const config = vscode.workspace.getConfiguration('aion');
             const targetLang = config.get<string>('language') || 'en';
             const isRTL = ['he', 'ar', 'fa', 'ur'].includes(targetLang.toLowerCase());
 
@@ -240,7 +265,7 @@ async function handleDevCreate(
             const description = doc.getText();
             const { code, suggestedFilename } = await aiService.generateCode(description);
 
-            const config = vscode.workspace.getConfiguration('md-translator');
+            const config = vscode.workspace.getConfiguration('aion');
             const customPath = config.get<string>('devCreatePath') || '';
             const workspaceFolders = vscode.workspace.workspaceFolders;
 
@@ -293,7 +318,7 @@ async function handleDevUpgrade(
     doc: vscode.TextDocument,
     context: vscode.ExtensionContext
 ) {
-    const config = vscode.workspace.getConfiguration('md-translator');
+    const config = vscode.workspace.getConfiguration('aion');
     const targetLang = config.get<string>('language') || 'en';
     const isRTL = ['he', 'ar', 'fa', 'ur'].includes(targetLang.toLowerCase());
 
@@ -567,9 +592,9 @@ function escapeHtml(text: string): string {
 async function updateContextKeys() {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
-        vscode.commands.executeCommand('setContext', 'md-translator.isTranslateFile', false);
-        vscode.commands.executeCommand('setContext', 'md-translator.isDevFile', false);
-        vscode.commands.executeCommand('setContext', 'md-translator.isCreateFile', false);
+        vscode.commands.executeCommand('setContext', 'aion.isTranslateFile', false);
+        vscode.commands.executeCommand('setContext', 'aion.isDevFile', false);
+        vscode.commands.executeCommand('setContext', 'aion.isCreateFile', false);
         return;
     }
 
@@ -579,9 +604,9 @@ async function updateContextKeys() {
     const isDev = fileFilter.isAllowed(filePath, 'analysis').allowed;
     const isCreate = fileFilter.isAllowed(filePath, 'create').allowed;
 
-    vscode.commands.executeCommand('setContext', 'md-translator.isTranslateFile', isTranslate);
-    vscode.commands.executeCommand('setContext', 'md-translator.isDevFile', isDev);
-    vscode.commands.executeCommand('setContext', 'md-translator.isCreateFile', isCreate);
+    vscode.commands.executeCommand('setContext', 'aion.isTranslateFile', isTranslate);
+    vscode.commands.executeCommand('setContext', 'aion.isDevFile', isDev);
+    vscode.commands.executeCommand('setContext', 'aion.isCreateFile', isCreate);
 }
 
 function getUpgradePromptWebviewContent(isRTL: boolean, labels: any): string {

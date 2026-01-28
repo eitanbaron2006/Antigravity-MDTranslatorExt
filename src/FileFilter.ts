@@ -14,7 +14,7 @@ export class FileFilter {
     async loadSettings() {
         if (this.loaded) return;
 
-        const config = vscode.workspace.getConfiguration('md-translator');
+        const config = vscode.workspace.getConfiguration('aion');
         this.ignoreListActive = config.get<boolean>('ignoreListActive') ?? true;
         const ignoreFilesConfig = config.get<string[]>('ignoreFiles') || [];
         this.whitelistActive = config.get<boolean>('whitelistActive') ?? false;
