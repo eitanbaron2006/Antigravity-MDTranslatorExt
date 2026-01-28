@@ -75,7 +75,6 @@ export class Agent {
             try {
                 this.onUpdate({ type: 'setThinking', value: true });
                 const response = await this.aiService.callAgenticApi(systemPrompt, this.messages, TOOLS);
-                this.onUpdate({ type: 'setThinking', value: false });
 
                 if (response.thought) {
                     const hasTools = response.toolCalls && response.toolCalls.length > 0;
@@ -132,8 +131,14 @@ export class Agent {
                 }
             } catch (err: any) {
                 console.error('Agent Loop Error:', err);
-                this.onUpdate({ role: 'assistant', content: `Execution Error: ${err.message}` });
+                // Technical error notice
+                this.onUpdate({
+                    role: 'assistant',
+                    content: `### ❌ API Error\n\n${err.message}\n\n*Please wait a moment before retrying or check your API quota.*`
+                });
                 break;
+            } finally {
+                this.onUpdate({ type: 'setThinking', value: false });
             }
         }
     }
@@ -146,7 +151,8 @@ Follow the user's instructions carefully.
 1. **Be Concise**: If the user just says "Hi", respond naturally without using tools.
 2. **Context First**: Don't guess. Use tools like 'list_files_recursive' only if you need to know about the project to answer.
 3. **Reasoning**: Use the 'thought' field for your logic. Don't repeat it in 'content'.
-4. **Tool Use**: You MUST only use tools when necessary. If the user's task is completed, provide the final answer in 'content'.
+4. **Tool Use & Transparency**: You MUST only use tools when necessary. When creating or modifying files, always mention the specific file names and a brief summary of the changes in your 'content' field.
+5. **Progress Reports**: At the end of a sub-task or task, explicitly list which files were created or modified.
 
 ### CURRENT MODE: ${mode}
 ${this.getModeInstructions(mode)}

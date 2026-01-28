@@ -1,5 +1,20 @@
 # Aion Extension Updates
 
+## 1.8.17
+- **Implemented Retry Mechanism**: Added exponential backoff retry logic (1s, 2s, 4s...) specifically for 429 "Too Many Requests" errors, matching Cline's behavior.
+- **Improved API Resilience**: Aion now waits and retries automatically before giving up on quota-limited AI providers.
+
+## 1.8.16
+- **Fixed Silent Thinking Loop**: Improved error handling to ensure the "thinking" indicator is always cleared, even on API errors (like 429).
+- **Technical Error Messaging**: Added pretty Markdown-formatted error messages for API failures.
+- **Syntax Fix**: Resolved a core logic error in the agent loop.
+
+## 1.8.15 - Core Agent Loop Fix
+- **Architecture Realignment**: Successfully ported Cline's message handling architecture. System prompt and message history are now passed separately to the API, preventing "Prompt Bloat" and infinite loops.
+- **Improved Conversational Context**: The assistant now remembers previous turns correctly through a structured message array instead of a concatenated string.
+- **Greeting Logic**: Fixed an issue where the agent would trigger file scanning for simple greetings like "Hi".
+- **Code Stability**: Rewrote the `Agent` class to resolve structural inconsistencies and improve task execution flow.
+
 ## 1.8.13 - Core Agent Loop Fix
 - **Architecture Realignment**: Successfully ported Cline's message handling architecture. System prompt and message history are now passed separately to the API, preventing "Prompt Bloat" and infinite loops.
 - **Improved Conversational Context**: The assistant now remembers previous turns correctly through a structured message array instead of a concatenated string.

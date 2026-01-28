@@ -151,7 +151,7 @@ ${JSON.stringify(tools.map(t => ({ name: t.name, description: t.description, par
             customUrl: settings.customUrl
         });
 
-        const response = await handler.createMessage(systemPrompt, messages);
+        const response = await this.callWithRetry(() => handler.createMessage(systemPrompt, messages));
 
         // If it's already an object, return it. If it's a string, try to parse it.
         if (typeof response === 'object' && response !== null) {
@@ -159,6 +159,33 @@ ${JSON.stringify(tools.map(t => ({ name: t.name, description: t.description, par
         }
 
         return this.extractJson(String(response));
+    }
+
+    private async callWithRetry<T>(fn: () => Promise<T>, maxRetries: number = 3): Promise<T> {
+        let baseDelay = 1000;
+        let lastError: any;
+
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                return await fn();
+            } catch (error: any) {
+                lastError = error;
+                const isRateLimit =
+                    error?.status === 429 ||
+                    error?.message?.includes('429') ||
+                    error?.message?.includes('RESOURCE_EXHAUSTED') ||
+                    error?.message?.includes('Too Many Requests');
+
+                if (!isRateLimit || attempt === maxRetries - 1) {
+                    throw error;
+                }
+
+                const delay = baseDelay * Math.pow(2, attempt);
+                console.warn(`[Aion] Rate limit (429) hit. Retrying in ${delay}ms... (Attempt ${attempt + 1}/${maxRetries})`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+        throw lastError;
     }
 
     private buildTranslationPrompt(text: string, settings: any): string {

@@ -101,6 +101,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
                 <style>
                     :root {
                         --aion-primary: #3794ef;
@@ -271,13 +272,73 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         border-color: rgba(255,255,255,0.2);
                     }
                     .task-text {
-                        color: #ccc;
+                        color: var(--vscode-foreground);
                         margin-bottom: 8px;
-                        display: -webkit-box;
-                        -webkit-line-clamp: 2;
-                        -webkit-box-orient: vertical;
-                        overflow: hidden;
+                        line-height: 1.6;
+                        font-size: 13px;
                     }
+                    .task-text pre {
+                        background: rgba(0,0,0,0.3);
+                        padding: 8px;
+                        border-radius: 4px;
+                        overflow-x: auto;
+                        border: 1px solid var(--aion-border);
+                    }
+                    .task-text code {
+                        font-family: var(--vscode-editor-font-family, monospace);
+                        background: rgba(255,255,255,0.05);
+                        padding: 2px 4px;
+                        border-radius: 3px;
+                    }
+                    .task-text.rtl {
+                        font-size: 15px; /* Slightly larger for Hebrew readability */
+                        line-height: 1.8;
+                    }
+                    
+                    /* Specific Card Styles */
+                    .task-card.thought {
+                        background: transparent;
+                        border: none;
+                        border-left: 2px solid #444;
+                        border-radius: 0;
+                        color: #888;
+                        padding-top: 0;
+                        padding-bottom: 0;
+                        margin: 16px 0;
+                    }
+                    .task-card.thought .card-header {
+                        font-size: 11px;
+                        color: #666;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+                    .task-card.thought .task-text {
+                        color: #888;
+                        font-style: italic;
+                    }
+                    
+                    .task-card.tool {
+                        background: rgba(55, 148, 239, 0.05);
+                        border-color: rgba(55, 148, 239, 0.2);
+                    }
+                    
+                    .card-header {
+                        font-weight: 600;
+                        margin-bottom: 8px;
+                        font-size: 12px;
+                        color: var(--aion-primary);
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                    }
+                    
+                    .task-card.user {
+                        background: var(--vscode-editor-background);
+                        align-self: flex-end;
+                        border-color: var(--aion-primary);
+                        max-width: 90%;
+                    }
+                    .task-card.user .card-header { color: #888; }
                     .task-footer {
                         display: flex;
                         justify-content: space-between;
@@ -774,10 +835,30 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                                 else div.classList.add('ltr');
 
                                 let content = '<div class="card-header">' + getRoleHeader(data.role, data.text) + '</div>';
-                                content += '<div class="task-text" style="-webkit-line-clamp: unset;">' + (data.text || '') + '</div>';
+                                
+                                let textToShow = data.text || '';
+                                if (data.role === 'assistant') {
+                                    // Use marked for assistant responses
+                                    textToShow = marked.parse(textToShow);
+                                }
+                                
+                                content += '<div class="task-text">' + textToShow + '</div>';
                                 
                                 if (data.toolCall) {
-                                    content += '<div style="font-size: 10px; color: #888; border-top: 1px solid var(--aion-border); margin-top: 8px; padding-top: 4px;">Tool: ' + data.toolCall.name + '</div>';
+                                    let toolDetails = '<div style="font-size: 11px; color: #aaa; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 6px; margin-top: 8px; border: 1px solid var(--aion-border);">';
+                                    toolDetails += '<div style="font-weight: 600; color: var(--aion-primary); margin-bottom: 4px;">Requesting: ' + data.toolCall.name + '</div>';
+                                    
+                                    // Extract path or command for transparency
+                                    const args = data.toolCall.args || {};
+                                    if (args.path || args.filePath || args.relative_path) {
+                                        toolDetails += '<div><b>Path:</b> <code style="color: #64b5f6;">' + (args.path || args.filePath || args.relative_path) + '</code></div>';
+                                    }
+                                    if (args.command) {
+                                        toolDetails += '<div><b>Command:</b> <code style="color: #ffd54f;">' + args.command + '</code></div>';
+                                    }
+                                    
+                                    toolDetails += '</div>';
+                                    content += toolDetails;
                                 }
                                 
                                 div.innerHTML = content;
