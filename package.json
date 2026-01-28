@@ -2,7 +2,7 @@
     "name": "aion",
     "displayName": "Aion",
     "description": "Modern AI Coding Agent for professional development. Full-scale automation and intelligent assistance.",
-    "version": "1.7.9",
+    "version": "1.8.0",
     "icon": "resources/icon.png",
     "repository": {
         "type": "git",

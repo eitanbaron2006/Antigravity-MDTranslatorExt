@@ -1,14 +1,18 @@
 import * as vscode from 'vscode';
 import { AiService } from './AiService';
+import { Agent, AgentMessage } from './Agent';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'aion-chat';
     private _view?: vscode.WebviewView;
+    private _agent: Agent;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
         private readonly _aiService: AiService
-    ) { }
+    ) {
+        this._agent = new Agent(this._aiService, (msg) => this._postAgentMessage(msg));
+    }
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -27,27 +31,27 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.type) {
                 case 'sendMessage': {
-                    await this._handleChat(data.value);
+                    const { text, mode } = data.value;
+                    await this._agent.handleUserMessage(text, mode);
                     break;
                 }
             }
         });
     }
 
-    private async _handleChat(text: string) {
+    private _postAgentMessage(message: AgentMessage) {
         if (!this._view) return;
+        this._view.webview.postMessage({
+            type: 'addMessage',
+            role: message.role,
+            text: message.content,
+            toolCall: message.toolCall,
+            toolResult: message.toolResult
+        });
+    }
 
-        // Add user message to UI
-        this._view.webview.postMessage({ type: 'addMessage', role: 'user', text });
-
-        try {
-            // Simplified agent for initial version
-            // In the future, this will handle multi-step tool calls
-            const response = await this._aiService.upgradeCode("", `Respond as a helpful AI assistant named Aion. User says: ${text}`);
-            this._view.webview.postMessage({ type: 'addMessage', role: 'assistant', text: response });
-        } catch (err) {
-            this._view.webview.postMessage({ type: 'addMessage', role: 'assistant', text: 'Error communicating with AI.' });
-        }
+    private async _handleChat(text: string) {
+        // This is now handled via the Agent class
     }
 
     private _getHtmlForWebview(webview: vscode.Webview) {
@@ -522,9 +526,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     function send() {
                         const text = msg.value.trim();
                         if (text) {
-                            vscode.postMessage({ type: 'sendMessage', value: text });
-                            // For simulation/demo purposes, we clear it and don't yet have addMessage back.
-                            // However, let's restore addMessage listener so user can see their messages.
+                            const mode = document.getElementById('active-mode').textContent;
+                            vscode.postMessage({ type: 'sendMessage', value: { text, mode } });
                             msg.value = '';
                         }
                     }
@@ -541,6 +544,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                             const div = document.createElement('div');
                             div.className = 'task-card ' + data.role;
                             
+                            // Special styling for thoughts and tools
+                            if (data.role === 'thought') {
+                                div.style.opacity = '0.6';
+                                div.style.fontSize = '12px';
+                                div.style.fontStyle = 'italic';
+                                div.style.borderLeft = '2px solid var(--aion-primary)';
+                            } else if (data.role === 'tool') {
+                                div.style.background = 'rgba(0, 122, 204, 0.1)';
+                                div.style.borderColor = '#007acc';
+                            }
+
                             // Detect Hebrew and apply RTL
                             if (isHebrew(data.text)) {
                                 div.classList.add('rtl');
@@ -548,7 +562,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                                 div.classList.add('ltr');
                             }
 
-                            div.innerHTML = \`<div class="task-text">\${data.text}</div>\`;
+                            let content = '<div class="task-text">' + data.text + '</div>';
+                            if (data.toolCall) {
+                                content += '<div style="font-size: 10px; color: #888;">Tool: ' + data.toolCall.name + '</div>';
+                            }
+                            
+                            div.innerHTML = content;
                             chatContent.appendChild(div);
                             chatContent.scrollTop = chatContent.scrollHeight;
                         }
@@ -561,7 +580,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         }
                     });
 
-                    // Dropdown Logic
                     function setupDropdown(triggerId, dropdownId, activeLabelId, dataAttr) {
                         const trigger = document.getElementById(triggerId);
                         const dropdown = document.getElementById(dropdownId);
@@ -570,7 +588,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
                         trigger.addEventListener('click', (e) => {
                             e.stopPropagation();
-                            // Close other dropdowns
                             document.querySelectorAll('.dropdown').forEach(d => {
                                 if (d !== dropdown) d.classList.remove('show');
                             });
@@ -610,7 +627,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                                 item.classList.add('active');
                                 const val = item.getAttribute(dataAttr);
                                 if (activeLabel) {
-                                    // Update label but keep icons if present
                                     const span = activeLabel.parentElement.querySelector('span');
                                     if (span) span.textContent = val;
                                     else activeLabel.textContent = val;
@@ -619,7 +635,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                             });
                         });
                         
-                        // Prevent closure when clicking inside dropdown content
                         dropdown.addEventListener('click', (e) => {
                             e.stopPropagation();
                         });

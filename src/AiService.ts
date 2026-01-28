@@ -110,6 +110,37 @@ ${text}`;
         return result.code || text;
     }
 
+    async callAgenticApi(prompt: string, tools: any[]): Promise<any> {
+        const settings = this.getSettings();
+        const projectSkills = await this.getProjectSkills();
+
+        const enhancedPrompt = `
+${prompt}
+
+---
+ADDITIONAL CONTEXT & STANDARDS:
+${settings.devSystemPrompt ? `\nGLOBAL INSTRUCTIONS:\n${settings.devSystemPrompt}\n` : ''}${projectSkills}
+
+CRITICAL: You are an agent designed for tool-use. 
+Respond in JSON format with:
+- "thought": Your internal reasoning or next steps (in ${settings.language}).
+- "toolCalls": Array of { "name": string, "args": object, "callId": string } if you need to use tools.
+- "content": Your final response to the user if no more tools are needed (in ${settings.language}).
+
+Available Tools:
+${JSON.stringify(tools.map(t => ({ name: t.name, description: t.description, parameters: t.parameters })), null, 2)}
+`;
+
+        return await this.callAiApiForAgent(enhancedPrompt, settings);
+    }
+
+    private async callAiApiForAgent(prompt: string, settings: any): Promise<any> {
+        // We reuse the existing callAiApi logic but ensure it handles the agentic prompt
+        // and returns the structured JSON.
+        const result = await this.callAiApi(prompt, settings);
+        return result;
+    }
+
     private async callAiApi(prompt: string, settings: any): Promise<any> {
         const provider = settings.aiProvider;
         const apiKey = settings.apiKey;
