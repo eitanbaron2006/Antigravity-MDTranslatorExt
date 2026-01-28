@@ -17,6 +17,12 @@ export class AiService {
         };
     }
 
+    public updateConfig(config: any) {
+        // The configurations are stored in VS Code settings.
+        // This method serves as a trigger point if we needed to clear internal caches.
+        // Since getSettings() reads directly from VS Code config, we are good.
+    }
+
     private async getProjectSkills(): Promise<string> {
         const settings = this.getSettings();
         if (!settings.useProjectSkills) return '';
