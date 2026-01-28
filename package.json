@@ -2,7 +2,7 @@
     "name": "aion",
     "displayName": "Aion",
     "description": "Modern AI Coding Agent for professional development. Full-scale automation and intelligent assistance.",
-    "version": "1.5.0",
+    "version": "1.6.3",
     "icon": "resources/icon.png",
     "repository": {
         "type": "git",
@@ -215,25 +215,6 @@
                     "order": 17
                 }
             }
-        },
-        "viewsContainers": {
-            "activitybar": [
-                {
-                    "id": "aion-sidebar",
-                    "title": "Aion",
-                    "icon": "resources/sidebar-icon.svg"
-                }
-            ]
-        },
-        "views": {
-            "aion-sidebar": [
-                {
-                    "type": "webview",
-                    "id": "aion-chat",
-                    "name": "Aion",
-                    "icon": "resources/sidebar-icon.svg"
-                }
-            ]
         },
         "viewsContainers": {
             "activitybar": [

@@ -54,6 +54,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'resources', 'main.js'));
         const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'resources', 'reset.css'));
         const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'resources', 'vscode.css'));
+        const logoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'resources', 'sidebar-icon.svg'));
 
         // Mock data for recent tasks
         const recentTasks = [
@@ -108,11 +109,30 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     
                     .hero {
                         text-align: center;
-                        margin-top: 40px;
-                        color: #888;
-                        font-size: 14px;
-                        line-height: 1.5;
+                        margin-top: 22px;
+                        color: #fff;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 20px;
                         padding: 0 20px;
+                    }
+                    .hero-logo {
+                        width: 80px;
+                        height: 80px;
+                        opacity: 0.9;
+                    }
+                    .hero-title {
+                        font-size: 22px;
+                        font-weight: 600;
+                        color: #fff;
+                        margin: 0;
+                    }
+                    .hero-subtitle {
+                        font-size: 14px;
+                        color: #ccc;
+                        line-height: 1.5;
+                        max-width: 240px;
                     }
                     .hero a {
                         color: var(--aion-primary);
@@ -318,7 +338,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             <body>
                 <div class="content">
                     <div class="hero">
-                        Generate, refactor, and debug code with AI assistance. Check out our <a href="#">documentation</a> to learn more.
+                        <img src="${logoUri}" class="hero-logo" alt="Aion Logo">
+                        <h2 class="hero-title">What can I do for you?</h2>
+                        <div class="hero-subtitle">
+                            Ready to ship? The code won't write itself—not without me, anyway.
+                        </div>
                     </div>
 
                     <div class="recent-tasks-area">
