@@ -1,10 +1,26 @@
-# Updates to Markdown Translator Extension (Version 0.1.0)
+# Aion Extension Updates
 
-## Summary of Changes
+## 1.8.13 - Core Agent Loop Fix
+- **Architecture Realignment**: Successfully ported Cline's message handling architecture. System prompt and message history are now passed separately to the API, preventing "Prompt Bloat" and infinite loops.
+- **Improved Conversational Context**: The assistant now remembers previous turns correctly through a structured message array instead of a concatenated string.
+- **Greeting Logic**: Fixed an issue where the agent would trigger file scanning for simple greetings like "Hi".
+- **Code Stability**: Rewrote the `Agent` class to resolve structural inconsistencies and improve task execution flow.
 
-This document describes the major updates made to the Markdown Translator extension from version 0.0.1 to 0.1.0.
+## 1.8.12 - Agent Response Optimization
+- **Deduplication Logic**: Fixed an issue where the agent would repeat the same answer in both "Thought" and "Assistant" blocks.
+- **Prompt Engineering**: Refined system prompt to ensure clearer separation between internal reasoning and final answers.
+- **Structural Integrity**: Pass `createMessage` empty system prompt by default for internal provider handling.
 
-## 1. RTL Support for Right-to-Left Languages
+## 1.8.11 - State Persistence & Architecture
+- **State Persistence**: Implemented `retainContextWhenHidden: true` to ensure chat history is preserved when switching sidebars or hiding the extension.
+- **Modular Provider Architecture**: Refactored `AiService` into a Cline-inspired provider system (`src/core/api`).
+- **New Providers**: Added dedicated handlers for Gemini, Anthropic, and OpenAI-compatible APIs (DeepSeek, etc.).
+- **Lint & Syntax Fixes**: Resolved multiple architectural inconsistencies and syntax errors in the core service layer.
+
+---
+
+# Legacy Updates (Markdown Translator)
+... (rest of the file)
 
 ### Changes Made:
 

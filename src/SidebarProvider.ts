@@ -38,7 +38,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             switch (data.type) {
                 case 'sendMessage': {
                     const { text, mode } = data.value;
-                    await this._agent.handleUserMessage(text, mode);
+                    await this._agent.executeTask(text, mode);
                     break;
                 }
                 case 'respondToPermission': {

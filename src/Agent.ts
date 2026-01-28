@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { AiService } from './AiService';
-import { TOOLS, Tool } from './Tools';
+import { TOOLS } from './Tools';
 
 export interface AgentMessage {
     role: 'user' | 'assistant' | 'tool' | 'thought';
@@ -8,24 +8,26 @@ export interface AgentMessage {
     toolCall?: {
         name: string;
         args: any;
-        callId: string;
+        callId?: string;
     };
     toolResult?: {
-        callId: string;
+        callId?: string;
         result: string;
     };
     requiresApproval?: boolean;
 }
 
 export class Agent {
-    private messages: AgentMessage[] = [];
+    private aiService: AiService;
+    private onUpdate: (data: any) => void;
+    private messages: any[] = [];
     private isRunning: boolean = false;
     private approvalResolver: ((granted: boolean) => void) | null = null;
 
-    constructor(
-        private readonly aiService: AiService,
-        private readonly onUpdate: (message: AgentMessage | { type: 'setThinking', value: boolean }) => void
-    ) { }
+    constructor(aiService: AiService, onUpdate: (data: any) => void) {
+        this.aiService = aiService;
+        this.onUpdate = onUpdate;
+    }
 
     public resolveApproval(granted: boolean) {
         if (this.approvalResolver) {
@@ -40,15 +42,16 @@ export class Agent {
         this.approvalResolver = null;
     }
 
-    public updateConfig(config: { provider: string, key: string, model: string, url: string }) {
+    public updateConfig(config: any) {
         this.aiService.updateConfig(config);
     }
 
-    public async handleUserMessage(text: string, mode: string) {
+    public async executeTask(text: string, mode: string = 'Code') {
         if (this.isRunning) return;
         this.isRunning = true;
 
-        this.messages.push({ role: 'user', content: text });
+        const userMessage = { role: 'user', content: text };
+        this.messages.push(userMessage);
         this.onUpdate({ role: 'user', content: text });
 
         try {
@@ -62,22 +65,27 @@ export class Agent {
 
     private async runLoop(mode: string) {
         let iterations = 0;
-        const maxIterations = 15; // Increased for more complex tasks
+        const maxIterations = 15;
 
         while (iterations < maxIterations) {
             iterations++;
 
             const systemPrompt = this.getSystemPrompt(mode);
-            const promptWithHistory = this.buildPrompt(systemPrompt);
 
             try {
                 this.onUpdate({ type: 'setThinking', value: true });
-                const response = await this.aiService.callAgenticApi(promptWithHistory, TOOLS);
+                const response = await this.aiService.callAgenticApi(systemPrompt, this.messages, TOOLS);
                 this.onUpdate({ type: 'setThinking', value: false });
 
                 if (response.thought) {
-                    this.onUpdate({ role: 'thought', content: response.thought });
-                    this.messages.push({ role: 'thought', content: response.thought });
+                    const hasTools = response.toolCalls && response.toolCalls.length > 0;
+                    const isDifferent = response.thought.trim() !== (response.content || '').trim();
+
+                    if (isDifferent || hasTools) {
+                        this.onUpdate({ role: 'thought', content: response.thought });
+                        // Add thought as an assistant message for context in the next turn
+                        this.messages.push({ role: 'assistant', content: `[Thought] ${response.thought}` });
+                    }
                 }
 
                 if (response.toolCalls && response.toolCalls.length > 0) {
@@ -98,38 +106,19 @@ export class Agent {
                             });
 
                             if (!granted) {
-                                const toolMessage: AgentMessage = {
-                                    role: 'tool',
-                                    content: 'Error: User rejected the tool execution.',
-                                    toolResult: { callId: tc.callId, result: 'Rejected by user.' }
-                                };
-                                this.messages.push(toolMessage);
-                                this.onUpdate(toolMessage);
+                                const toolResultMsg = { role: 'user', content: `Tool ${tc.name} execution rejected by user.` };
+                                this.messages.push(toolResultMsg);
+                                this.onUpdate({ role: 'tool', content: { name: tc.name, arguments: tc.args, result: 'Rejected by user' } });
                                 continue;
                             }
                         }
 
-                        this.onUpdate({ role: 'assistant', content: `[Tool] ${tc.name}`, toolCall: tc });
+                        const result = await this.executeTool(tc.name, tc.args);
+                        this.onUpdate({ role: 'tool', content: { name: tc.name, arguments: tc.args, result } });
 
-                        const tool = TOOLS.find(t => t.name === tc.name);
-                        let result = '';
-                        if (tool) {
-                            try {
-                                result = await tool.execute(tc.args);
-                            } catch (e: any) {
-                                result = `Error executing tool ${tc.name}: ${e.message}`;
-                            }
-                        } else {
-                            result = `Error: Tool "${tc.name}" is not recognized. Please check the tool definitions.`;
-                        }
-
-                        const toolMessage: AgentMessage = {
-                            role: 'tool',
-                            content: result,
-                            toolResult: { callId: tc.callId, result }
-                        };
-                        this.messages.push(toolMessage);
-                        this.onUpdate(toolMessage);
+                        // Properly log the tool call and result in history
+                        this.messages.push({ role: 'assistant', content: `I will use tool: ${tc.name}(${JSON.stringify(tc.args)})` });
+                        this.messages.push({ role: 'user', content: `Tool Result: ${result}` });
                     }
                     // Loop continues automatically to process tool results
                 } else if (response.content) {
@@ -137,8 +126,9 @@ export class Agent {
                     this.messages.push({ role: 'assistant', content: response.content });
                     break;
                 } else {
-                    // Fallback if AI returns empty but no tool calls
-                    break;
+                    // If we got here, it means we have neither tools nor content
+                    console.error('Empty AI response:', response);
+                    throw new Error('The AI returned an empty response. This might be due to a parsing error or context window limits.');
                 }
             } catch (err: any) {
                 console.error('Agent Loop Error:', err);
@@ -149,60 +139,38 @@ export class Agent {
     }
 
     private getSystemPrompt(mode: string): string {
-        const constitution = `
-You are Aion, an advanced autonomous coding agent. Your goal is to help the user with complex coding tasks by thinking, planning, and executing tools.
+        return `You are Aion, an advanced autonomous coding agent. 
+Follow the user's instructions carefully.
 
 ### CORE PRINCIPLES:
-1. **Explore First**: Use 'list_files_recursive' and 'read_file' to understand the project structure and existing code before making changes.
-2. **Plan Step-by-Step**: In your 'thought' field, outline what you've found and what you intend to do next.
-3. **Be Precise**: When editing files, use 'apply_diff' for targeted changes or 'write_to_file' for new files.
-4. **Verify Your Work**: Use 'run_command' (e.g., 'npm run compile', 'go test') to verify that your changes didn't break anything.
-5. **Recover Gracefully**: If a tool fails or generates an error, analyze the output and try a different approach.
+1. **Be Concise**: If the user just says "Hi", respond naturally without using tools.
+2. **Context First**: Don't guess. Use tools like 'list_files_recursive' only if you need to know about the project to answer.
+3. **Reasoning**: Use the 'thought' field for your logic. Don't repeat it in 'content'.
+4. **Tool Use**: You MUST only use tools when necessary. If the user's task is completed, provide the final answer in 'content'.
 
 ### CURRENT MODE: ${mode}
 ${this.getModeInstructions(mode)}
-
-### RESPONSE FORMAT:
-You MUST respond with a JSON object containing:
-- "thought": A detailed explanation of your current state, what tools you are calling and why.
-- "toolCalls": (Optional) An array of tool calls.
-- "content": (Optional) Your direct response to the user when a task or sub-task is complete.
 `;
-        return constitution;
     }
 
     private getModeInstructions(mode: string): string {
         const modes: Record<string, string> = {
-            'Architect': "You are in Architect mode. Focus on structural changes, high-level design, and system integration. Avoid writing large amounts of code until the design is approved.",
-            'Code': "You are in Code mode. Focus on efficient implementation, refactoring, and following project patterns exactly. Write clean, idiomatic code.",
-            'Ask': "You are in Ask mode. Focus on providing deep technical explanations and answering questions about the codebase. Use tools to gather facts before answering.",
-            'Debug': "You are in Debug mode. Hunt for bugs, analyze logs, and fix identified issues. Use investigative tools to find root causes.",
-            'Orchestrator': "You are in Orchestrator mode. Manage large-scale migrations or multi-component tasks. Delegate thinking to sub-steps.",
-            'Review': "You are in Review mode. Critically analyze code for security, performance, and best practices. Cite specific lines in your feedback."
+            'Architect': "Focus on high-level design and structural changes.",
+            'Code': "Focus on implementation, refactoring, and clean code.",
+            'Ask': "Focus on gathering information and explaining technical concepts.",
+            'Debug': "Focus on finding root causes and fixing bugs.",
         };
         return modes[mode] || "Act as a general-purpose coding assistant.";
     }
 
-    private buildPrompt(systemPrompt: string): string {
-        // More robust message serialization
-        let prompt = `System Constitution:\n${systemPrompt}\n\n`;
-
-        // Add last 20 messages to prevent context overflow while keeping recent history
-        const recentMessages = this.messages.slice(-20);
-
-        for (const msg of recentMessages) {
-            const role = msg.role.toUpperCase();
-            if (msg.role === 'thought') {
-                prompt += `[Thought]: ${msg.content}\n\n`;
-            } else if (msg.role === 'tool') {
-                prompt += `[Tool Result]: ${msg.content}\n\n`;
-            } else if (msg.toolCall) {
-                prompt += `[Assistant Tool Call]: ${msg.toolCall.name}(${JSON.stringify(msg.toolCall.args)})\n\n`;
-            } else {
-                prompt += `${role}: ${msg.content}\n\n`;
-            }
+    private async executeTool(name: string, args: any): Promise<string> {
+        try {
+            const tool = TOOLS.find(t => t.name === name);
+            if (!tool) return `Error: Tool ${name} not found`;
+            // Standardizing arguments passing
+            return await tool.execute(args || {});
+        } catch (err: any) {
+            return `Error executing tool ${name}: ${err.message}`;
         }
-
-        return prompt;
     }
 }

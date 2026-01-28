@@ -17,7 +17,12 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(
             vscode.window.registerWebviewViewProvider(
                 SidebarProvider.viewType,
-                sidebarProvider
+                sidebarProvider,
+                {
+                    webviewOptions: {
+                        retainContextWhenHidden: true
+                    }
+                }
             )
         );
 

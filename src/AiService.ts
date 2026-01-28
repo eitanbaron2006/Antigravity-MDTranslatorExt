@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { DEFAULT_SKILLS } from './DefaultSkills';
+import { createHandler } from './core/api';
 
 export class AiService {
     private getSettings() {
@@ -52,7 +53,7 @@ export class AiService {
     async translateAndSummarize(text: string): Promise<{ translatedText: string; summary: string }> {
         const settings = this.getSettings();
         const prompt = this.buildTranslationPrompt(text, settings);
-        const result = await this.callAiApi(prompt, settings);
+        const result = await this.callAiApi('', [{ role: 'user', content: prompt }], settings);
         return { translatedText: result.translation || text, summary: result.summary || '' };
     }
 
@@ -76,7 +77,7 @@ Return ONLY the JSON.
 Code to analyze:
 ${text}`;
 
-        const result = await this.callAiApi(prompt, settings);
+        const result = await this.callAiApi('', [{ role: 'user', content: prompt }], settings);
         return result.recommendations || [];
     }
 
@@ -93,7 +94,7 @@ Return a JSON object with:
 Description:
 ${description}`;
 
-        const result = await this.callAiApi(prompt, settings);
+        const result = await this.callAiApi('', [{ role: 'user', content: prompt }], settings);
         return {
             code: result.code || '// No code generated',
             suggestedFilename: result.suggestedFilename || 'generated_code.txt'
@@ -112,16 +113,16 @@ Return a JSON object with a "code" field containing the full upgraded implementi
 Original Code:
 ${text}`;
 
-        const result = await this.callAiApi(prompt, settings);
+        const result = await this.callAiApi('', [{ role: 'user', content: prompt }], settings);
         return result.code || text;
     }
 
-    async callAgenticApi(prompt: string, tools: any[]): Promise<any> {
+    async callAgenticApi(systemPrompt: string, messages: any[], tools: any[]): Promise<any> {
         const settings = this.getSettings();
         const projectSkills = await this.getProjectSkills();
 
-        const enhancedPrompt = `
-${prompt}
+        const fullSystemPrompt = `
+${systemPrompt}
 
 ---
 ADDITIONAL CONTEXT & STANDARDS:
@@ -130,105 +131,34 @@ ${settings.devSystemPrompt ? `\nGLOBAL INSTRUCTIONS:\n${settings.devSystemPrompt
 CRITICAL: You are an agent designed for tool-use. 
 Respond in JSON format with:
 - "thought": Your internal reasoning or next steps (in ${settings.language}).
-- "toolCalls": Array of { "name": string, "args": object, "callId": string } if you need to use tools.
+- "toolCalls": Array of { "name": string, "args": object } if you need to use tools.
 - "content": Your final response to the user if no more tools are needed (in ${settings.language}).
 
 Available Tools:
 ${JSON.stringify(tools.map(t => ({ name: t.name, description: t.description, parameters: t.parameters })), null, 2)}
 `;
 
-        return await this.callAiApiForAgent(enhancedPrompt, settings);
+        return await this.callAiApi(fullSystemPrompt, messages, settings);
     }
 
-    private async callAiApiForAgent(prompt: string, settings: any): Promise<any> {
-        // We reuse the existing callAiApi logic but ensure it handles the agentic prompt
-        // and returns the structured JSON.
-        const result = await this.callAiApi(prompt, settings);
-        return result;
-    }
+    private async callAiApi(systemPrompt: string, messages: any[], settings?: any): Promise<any> {
+        if (!settings) settings = this.getSettings();
 
-    private async callAiApi(prompt: string, settings: any): Promise<any> {
-        const provider = settings.aiProvider;
-        const apiKey = settings.apiKey;
-        const model = settings.aiModel;
-        const customUrl = settings.customUrl;
-
-        if (!apiKey && provider !== 'Custom') {
-            throw new Error(`API key for ${provider} not configured`);
-        }
-
-        const defaultModels: Record<string, string> = {
-            'Gemini': 'gemini-2.0-flash',
-            'OpenAI': 'gpt-4o',
-            'Anthropic': 'claude-3-5-sonnet-20240620',
-            'DeepSeek': 'deepseek-chat',
-            'Custom': 'gpt-3.5-turbo'
-        };
-
-        const selectedModel = model && model.trim() !== '' ? model : defaultModels[provider];
-
-        if (provider === 'Gemini') {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { response_mime_type: "application/json" }
-                })
-            });
-
-            if (!response.ok) throw new Error(`Gemini Error: ${response.statusText}`);
-            const data = await response.json() as any;
-            const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-            return this.extractJson(content);
-        }
-
-        if (provider === 'Anthropic') {
-            const response = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: {
-                    'x-api-key': apiKey,
-                    'anthropic-version': '2023-06-01',
-                    'content-type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: selectedModel,
-                    max_tokens: 4096,
-                    messages: [{ role: 'user', content: prompt }]
-                })
-            });
-
-            if (!response.ok) throw new Error(`Anthropic Error: ${response.statusText}`);
-            const data = await response.json() as any;
-            // Try to extract JSON from text if it's not strictly JSON
-            const content = data.content?.[0]?.text || '';
-            return this.extractJson(content);
-        }
-
-        // OpenAI-compatible
-        let baseUrl = '';
-        if (provider === 'OpenAI') baseUrl = 'https://api.openai.com/v1/chat/completions';
-        else if (provider === 'DeepSeek') baseUrl = 'https://api.deepseek.com/chat/completions';
-        else if (provider === 'Custom') baseUrl = customUrl.includes('/chat/completions') ? customUrl : (customUrl.endsWith('/') ? customUrl + 'chat/completions' : customUrl + '/chat/completions');
-
-        const response = await fetch(baseUrl, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: selectedModel,
-                response_format: { type: "json_object" },
-                messages: [{ role: 'user', content: prompt }]
-            })
+        const handler = createHandler({
+            apiProvider: settings.aiProvider,
+            apiModel: settings.aiModel,
+            apiKey: settings.apiKey,
+            customUrl: settings.customUrl
         });
 
-        if (!response.ok) throw new Error(`${provider} Error: ${response.statusText}`);
-        const data = await response.json() as any;
-        const content = data.choices?.[0]?.message?.content || '{}';
-        return this.extractJson(content);
+        const response = await handler.createMessage(systemPrompt, messages);
+
+        // If it's already an object, return it. If it's a string, try to parse it.
+        if (typeof response === 'object' && response !== null) {
+            return response;
+        }
+
+        return this.extractJson(String(response));
     }
 
     private buildTranslationPrompt(text: string, settings: any): string {
