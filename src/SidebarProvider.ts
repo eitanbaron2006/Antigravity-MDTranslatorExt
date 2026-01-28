@@ -219,7 +219,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         flex-direction: column;
                         align-items: center;
                         gap: 20px;
-                        padding: 0 20px;
+                        padding: 0px;
                     }
                     .hero-logo {
                         width: 80px;
